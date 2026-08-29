@@ -1,0 +1,41 @@
+# ═══ SECRETOS · nunca al repositorio ═══════════════════
+wallet/
+Wallet_*/
+*.sso
+*.p12
+*.jks
+tnsnames.ora
+sqlnet.ora
+ojdbc.properties
+.env
+.env.*
+!.env.example
+application-local.yml
+application-secrets.yml
+
+# ═══ Java · Spring Boot ════════════════════════════════
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+
+# ═══ Node · React · Vite ═══════════════════════════════
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+.vite/
+
+# ═══ NetBeans ══════════════════════════════════════════
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# ═══ IDE y sistema ═════════════════════════════════════
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
