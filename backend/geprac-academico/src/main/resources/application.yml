@@ -1,10 +1,7 @@
 spring:
   application:
     name: geprac-academico
-
-  profiles:
-    active: local
-
+    
   datasource:
     url: jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:5432/postgres
     username: postgres.txogxkmtihkqeowmlicm
