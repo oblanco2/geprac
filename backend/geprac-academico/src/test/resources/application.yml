@@ -1,0 +1,10 @@
+# Configuración solo para las pruebas.
+# contextLoads verifica que el contexto de Spring carga bien;
+# no necesita base de datos real, así que se desactivan Flyway,
+# JPA y la conexión.
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration
+      - org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration
