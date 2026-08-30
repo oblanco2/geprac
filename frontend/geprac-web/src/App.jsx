@@ -1,122 +1,110 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { supabase } from './lib/supabase'
+import cliente from './api/cliente'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [correo, setCorreo] = useState('director@udi.edu.co')
+  const [clave, setClave] = useState('')
+  const [sesion, setSesion] = useState(null)
+  const [programas, setProgramas] = useState(null)
+  const [cargando, setCargando] = useState(false)
+  const [error, setError] = useState(null)
+
+  const entrar = async (e) => {
+    e.preventDefault()
+    setError(null)
+    setCargando(true)
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: correo,
+      password: clave,
+    })
+    setCargando(false)
+    if (error) setError(error.message)
+    else setSesion(data.session)
+  }
+
+  const consultar = async () => {
+    setError(null)
+    setCargando(true)
+    try {
+      const { data } = await cliente.get('/programas')
+      setProgramas(data)
+    } catch (err) {
+      setError(err.mensaje)
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  const salir = async () => {
+    await supabase.auth.signOut()
+    setSesion(null)
+    setProgramas(null)
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="container py-5" style={{ maxWidth: '640px' }}>
+      <div className="mb-4">
+        <span className="d-inline-block borde-oro ps-2">
+          <h1 className="h3 fw-bold mb-0">GEPRAC</h1>
+        </span>
+        <p className="text-secondary small mb-0 mt-1">
+          Software para la Gestión de Prácticas Académicas
+        </p>
+      </div>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {!sesion ? (
+        <div className="card border-0 shadow-sm">
+          <div className="card-body p-4">
+            <h2 className="h5 mb-3">Ingresa a tu cuenta</h2>
+            <form onSubmit={entrar}>
+              <div className="mb-3">
+                <label htmlFor="correo" className="form-label small">Correo</label>
+                <input
+                  id="correo" type="email" className="form-control"
+                  value={correo} onChange={(e) => setCorreo(e.target.value)} required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="clave" className="form-label small">Contraseña</label>
+                <input
+                  id="clave" type="password" className="form-control"
+                  value={clave} onChange={(e) => setClave(e.target.value)} required
+                />
+              </div>
+              <button type="submit" className="btn btn-primary w-100" disabled={cargando}>
+                {cargando ? 'Verificando…' : 'Entrar'}
+              </button>
+            </form>
+          </div>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      ) : (
+        <div className="card border-0 shadow-sm">
+          <div className="card-body p-4">
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <p className="mb-0 fw-semibold">{sesion.user.email}</p>
+                <p className="text-secondary small mb-0">Sesión activa</p>
+              </div>
+              <button className="btn btn-outline-secondary btn-sm" onClick={salir}>
+                Salir
+              </button>
+            </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+            <button className="btn btn-primary" onClick={consultar} disabled={cargando}>
+              {cargando ? 'Consultando…' : 'Consultar programas'}
+            </button>
+
+            {programas && (
+              <div className="alert alert-success mt-3 mb-0 small">
+                Respuesta del microservicio: <code>{JSON.stringify(programas)}</code>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {error && <div className="alert alert-danger mt-3 small">{error}</div>}
+    </div>
   )
 }
-
-export default App

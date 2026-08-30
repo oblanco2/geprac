@@ -39,3 +39,4 @@ nbdist/
 .vscode/
 .DS_Store
 Thumbs.db
+/frontend/geprac-web/nbproject/private/
