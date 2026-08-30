@@ -1,0 +1,28 @@
+/* Paleta UDI: azul #016E9F y dorado #F7C634.
+   Se redefinen las variables de Bootstrap en lugar de
+   reescribir componentes. */
+:root {
+  --bs-primary: #016E9F;
+  --bs-primary-rgb: 1, 110, 159;
+  --udi-oro: #F7C634;
+  --udi-tinta: #0C1D28;
+  --udi-lienzo: #F5F8FA;
+}
+
+body {
+  background-color: var(--udi-lienzo);
+  color: var(--udi-tinta);
+}
+
+.btn-primary {
+  --bs-btn-bg: #016E9F;
+  --bs-btn-border-color: #016E9F;
+  --bs-btn-hover-bg: #015B84;
+  --bs-btn-hover-border-color: #015B84;
+}
+
+.text-udi { color: #016E9F !important; }
+.borde-oro { border-left: 3px solid var(--udi-oro) !important; }
+
+/* Cifras alineadas en columna: horas, fechas, identificadores */
+.cifra { font-variant-numeric: tabular-nums; }
