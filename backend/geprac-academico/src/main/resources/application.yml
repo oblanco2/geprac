@@ -26,6 +26,7 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: https://txogxkmtihkqeowmlicm.supabase.co/auth/v1/.well-known/jwks.json
+          jws-algorithms: ES256
 
 server:
   port: ${PORT:8080}
