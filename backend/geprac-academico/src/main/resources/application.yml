@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:5432/postgres
     username: postgres.txogxkmtihkqeowmlicm
-    password: ${Integrador.2026*:}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
