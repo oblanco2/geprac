@@ -2,46 +2,130 @@
 
 **Software para la Gestión de Prácticas Académicas**
 
-Universidad de Investigación y Desarrollo · Ingeniería de Sistemas · Periodo II-2026
-Proyecto Integrador de quinto semestre
+Universidad de Investigación y Desarrollo · Ingeniería de Sistemas · Proyecto Integrador de quinto semestre · Periodo II-2026
+
+En los programas de licenciatura de la UDI, cada estudiante realiza una práctica pedagógica por semestre, de primero a octavo, y para cada una diligencia los mismos cuatro formatos institucionales. GEPRAC elimina esa repetición: el estudiante se registra una sola vez, selecciona la práctica que va a cursar y el software genera sus formatos ya diligenciados, con los datos de su registro y el contenido de esa práctica tomado del catálogo. El historial de las ocho prácticas queda disponible en cualquier momento.
 
 ## Equipo
 
-| Integrante | Frente |
+| Integrante | Frente de trabajo |
 |---|---|
-| Oscar Iván Blanco Díaz | Arquitectura y microservicio de Gestión Académica |
-| Darien Asdrwal Pesca Ojeda | Datos y microservicio de Seguimiento y Evaluación |
-| José Fernando Rincón Barrios | Cliente, integración de identidad y despliegue |
+| Oscar Iván Blanco Díaz | Arquitectura general y microservicio de Identidad y Perfil Académico |
+| Darien Asdrwal Pesca Ojeda | Modelo de datos y microservicio de Legalización de Prácticas |
+| José Fernando Rincón Barrios | Cliente web, integración de la autenticación y despliegue |
 
 ## Arquitectura
 
-Dos microservicios independientes, cada uno con su propia base de datos.
+Dos microservicios con base de datos independiente, consumidos por un cliente web único. La identidad y el perfil del estudiante son permanentes y cambian rara vez; la legalización es transaccional y se repite cada periodo. Por eso cada conjunto vive en su propio servicio y en su propia base.
 
-| Componente | Tecnología | Despliegue |
-|---|---|---|
-| Cliente web | React 18 · Vite · Bootstrap 5 | Vercel |
-| Microservicio 1 · Gestión Académica | Java 17 · Spring Boot 3 | Oracle Cloud |
-| Microservicio 2 · Seguimiento y Evaluación | Java 17 · Spring Boot 3 | Oracle Cloud |
-| Identidad | Keycloak 26 (OIDC) | Oracle Cloud |
-| Datos | Oracle Autonomous Database x2 | Oracle Cloud Free Tier |
+| Componente | Responsabilidad | Tecnología | Despliegue |
+|---|---|---|---|
+| Cliente web | Interfaz de los tres actores | React 19 · Vite 8 · Bootstrap 5.3 | Vercel |
+| MS-01 Identidad y Perfil Académico | Usuarios y sus roles, programas académicos, estudiantes y hoja de vida | Java 21 · Spring Boot 4.1.1 · Spring Data JPA · Flyway | Render (Docker) |
+| MS-02 Legalización de Prácticas | Catálogo de prácticas, instituciones, periodos, inscripciones, formatos generados y revisiones | Java 21 · Spring Boot 4.1.1 · Spring Data JPA · Flyway | Render (Docker) |
+| Bases de datos | Esquema `identidad` (6 tablas) para MS-01 y esquema `legalizacion` (18 tablas) para MS-02, en proyectos separados | PostgreSQL 17 | Supabase |
+| Autenticación | Proveedor de identidad único para todo el software | Supabase Auth · JWT firmado con ES256 | Supabase |
 
-## Estructura
+- El cliente obtiene el token en Supabase Auth y lo envía en cada petición (`Authorization: Bearer`). Cada microservicio lo valida por su cuenta contra las llaves públicas del proveedor, sin consultar al otro.
+- Los dos servicios se comunican en un solo punto: cuando el estudiante inicia la inscripción, MS-02 le solicita a MS-01 los datos del perfil.
+- MS-02 no declara claves foráneas hacia MS-01: guarda como valores los identificadores que cruzan la frontera.
 
-    backend/geprac-academico/     CU-01 a CU-06
-    backend/geprac-seguimiento/   CU-07 a CU-13
-    frontend/geprac-web/          interfaz de los seis roles
-    infra/                        Keycloak y scripts de base de datos
-    docs/                         documentos de las tres entregas
+## Estructura del repositorio
 
-## Roles del software
+```
+backend/
+  geprac-academico/      MS-01 Identidad y Perfil Académico
+  geprac-legalizacion/   MS-02 Legalización de Prácticas
+frontend/
+  geprac-web/            cliente web
+infra/
+  db/                    scripts de la base de datos
+docs/                    documentos de las entregas
+```
 
-Director del Programa · Coordinador de Práctica · Docente Asesor
-Estudiante Practicante · Institución Receptora · Superusuario
+## Actores y casos de uso
 
-## Puesta en marcha
+| Caso de uso | Actor |
+|---|---|
+| CU-01 Mantener perfil del estudiante | Estudiante Practicante |
+| CU-02 Gestionar el catálogo de prácticas | Director del Programa |
+| CU-03 Gestionar instituciones receptoras | Director del Programa |
+| CU-04 Preparar el semestre | Director del Programa |
+| CU-05 Inscribir la práctica del periodo | Estudiante Practicante |
+| CU-06 Revisar la inscripción | Tutor Académico |
+| CU-07 Avalar la inscripción | Director del Programa |
+| CU-08 Emitir los formatos institucionales | Estudiante Practicante |
+| CU-09 Consultar el historial de prácticas | Los tres actores, cada uno con su alcance |
 
-Cada componente tiene su propio README con los pasos de instalación.
+## Puesta en marcha local
+
+Requisitos: JDK 21, Node.js 20.19 o 22.12 en adelante, y Git. Maven no hace falta instalarlo: cada microservicio trae su Maven Wrapper (`mvnw`).
+
+### MS-01 · `backend/geprac-academico`
+
+1. Crear el archivo `src/main/resources/application-local.yml` con la contraseña de la base. Git lo ignora, así que nunca se sube al repositorio:
+
+   ```yaml
+   spring:
+     datasource:
+       password: escriba-aqui-la-contraseña
+   ```
+
+2. Arrancar el servicio con el perfil `local`:
+   - **NetBeans:** *Run Project*. El archivo `nbactions.xml` ya activa el perfil.
+   - **Consola en Windows:** `mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"`
+   - **Consola en Linux o macOS:** `./mvnw spring-boot:run -Dspring-boot.run.profiles=local`
+
+3. El servicio queda en `http://localhost:8080/api`. Su estado se consulta sin token en `http://localhost:8080/api/actuator/health`; las demás rutas exigen el token de Supabase Auth.
+
+### Cliente web · `frontend/geprac-web`
+
+1. Copiar `.env.example` como `.env` y completar sus tres variables. Git también ignora este archivo.
+
+   | Variable | Valor |
+   |---|---|
+   | `VITE_SUPABASE_URL` | URL del proyecto de Supabase |
+   | `VITE_SUPABASE_ANON_KEY` | Llave pública (*anon*) del proyecto |
+   | `VITE_API_ACADEMICO` | URL base de MS-01: `http://localhost:8080/api` en local |
+
+2. Instalar las dependencias y arrancar:
+
+   ```
+   npm install
+   npm run dev
+   ```
+
+3. El cliente queda en `http://localhost:5173`, origen que la configuración CORS de MS-01 ya admite.
+
+## Variables de entorno en producción
+
 Ninguna credencial vive en este repositorio: todas viajan como variables de entorno.
+
+| Dónde | Variable | Contenido |
+|---|---|---|
+| Render · MS-01 | `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de MS-01 |
+| Render · MS-01 | `SPRING_DATASOURCE_URL` | Cadena JDBC del *pooler* de Supabase, sin credenciales; reemplaza la de `application.yml` |
+| Render · MS-01 | `PORT` | La asigna Render |
+| Vercel · cliente | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_ACADEMICO` | Las mismas del `.env` local, con la dirección pública de MS-01 |
+
+## Despliegue
+
+- **MS-01:** Render construye la imagen con el `Dockerfile` de dos etapas de `backend/geprac-academico` —Maven compila el proyecto y una imagen mínima de Java 21 ejecuta el binario con un usuario sin privilegios— y la despliega con cada commit en la rama `develop`.
+- **Cliente web:** Vercel.
+- El plan gratuito de Render suspende el servicio tras un rato sin uso. La primera petición puede tardar unos 50 segundos mientras despierta, y el cliente la espera hasta 60.
+
+| Componente | Dirección |
+|---|---|
+| Cliente web | https://geprac-geprac.vercel.app |
+| MS-01 | https://geprac-academico.onrender.com/api |
+
+## Estado del desarrollo
+
+Al 4 de octubre de 2026:
+
+- **MS-01:** desplegado en Render y conectado a su base en Supabase. Valida el token de Supabase Auth y expone el estado del servicio y una consulta de prueba (`GET /api/programas`). Su migración `V1` todavía crea el modelo preliminar del primer avance; el esquema `identidad` del documento se monta en el segundo avance.
+- **MS-02:** por crear, en `backend/geprac-legalizacion`.
+- **Cliente web:** inicio de sesión con Supabase Auth y llamada de prueba a MS-01.
 
 ## Entregas
 
