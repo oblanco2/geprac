@@ -18,7 +18,7 @@ spring:
 
   flyway:
     enabled: true
-    baseline-on-migrate: true
+    schemas: identidad
     locations: classpath:db/migration
 
   security:
