@@ -15,10 +15,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: identidad
 
   flyway:
     enabled: true
-    baseline-on-migrate: true
+    schemas: identidad
     locations: classpath:db/migration
 
   security:
