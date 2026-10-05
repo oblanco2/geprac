@@ -78,6 +78,22 @@ Requisitos: JDK 21, Node.js 20.19 o 22.12 en adelante, y Git. Maven no hace falt
 
 3. El servicio queda en `http://localhost:8080/api`. Su estado se consulta sin token en `http://localhost:8080/api/actuator/health`; las demás rutas exigen el token de Supabase Auth.
 
+### MS-02 · `backend/geprac-legalizacion`
+
+1. Crear el archivo `src/main/resources/application-local.yml` con la conexión a la base de MS-02. A diferencia de MS-01, aquí van los tres datos, porque MS-02 no trae ninguno en `application.yml`. Git también ignora este archivo:
+
+   ```yaml
+   spring:
+     datasource:
+       url: jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:5432/postgres
+       username: postgres.zuwyslwrrbzuwvsfcdna
+       password: escriba-aqui-la-contraseña
+   ```
+
+2. Arrancar el servicio con el perfil `local`, igual que MS-01: *Run Project* en NetBeans, o por consola desde `backend/geprac-legalizacion`.
+
+3. El servicio queda en `http://localhost:8081/api`, para que pueda correr al mismo tiempo que MS-01. Su estado se consulta en `http://localhost:8081/api/actuator/health`.
+
 ### Cliente web · `frontend/geprac-web`
 
 1. Copiar `.env.example` como `.env` y completar sus tres variables. Git también ignora este archivo.
@@ -106,11 +122,16 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 | Render · MS-01 | `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de MS-01 |
 | Render · MS-01 | `SPRING_DATASOURCE_URL` | Cadena JDBC del *pooler* de Supabase, sin credenciales; reemplaza la de `application.yml` |
 | Render · MS-01 | `PORT` | La asigna Render |
+| Render · MS-02 | `SPRING_DATASOURCE_URL` | Cadena JDBC del *Session pooler* del proyecto de Supabase de MS-02, sin credenciales |
+| Render · MS-02 | `SPRING_DATASOURCE_USERNAME` | Usuario del pooler: `postgres.` seguido del código del proyecto |
+| Render · MS-02 | `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de MS-02 |
+| Render · MS-02 | `PORT` | La asigna Render |
 | Vercel · cliente | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_ACADEMICO` | Las mismas del `.env` local, con la dirección pública de MS-01 |
 
 ## Despliegue
 
 - **MS-01:** Render construye la imagen con el `Dockerfile` de dos etapas de `backend/geprac-academico` —Maven compila el proyecto y una imagen mínima de Java 21 ejecuta el binario con un usuario sin privilegios— y la despliega con cada commit en la rama `develop`.
+- **MS-02:** igual que MS-01, con el `Dockerfile` de `backend/geprac-legalizacion`. Un filtro de construcción hace que solo se vuelva a desplegar cuando un commit en `develop` cambia esa carpeta.
 - **Cliente web:** Vercel.
 - El plan gratuito de Render suspende el servicio tras un rato sin uso. La primera petición puede tardar unos 50 segundos mientras despierta, y el cliente la espera hasta 60.
 
@@ -118,13 +139,14 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 |---|---|
 | Cliente web | https://geprac-geprac.vercel.app |
 | MS-01 | https://geprac-academico.onrender.com/api |
+| MS-02 | https://geprac-legalizacion.onrender.com/api |
 
 ## Estado del desarrollo
 
-Al 4 de octubre de 2026:
+Al 5 de octubre de 2026:
 
-- **MS-01:** desplegado en Render y conectado a su base en Supabase. Valida el token de Supabase Auth y expone el estado del servicio y una consulta de prueba (`GET /api/programas`). Su migración `V1` todavía crea el modelo preliminar del primer avance; el esquema `identidad` del documento se monta en el segundo avance.
-- **MS-02:** por crear, en `backend/geprac-legalizacion`.
+- **MS-01:** desplegado en Render. Flyway montó el esquema `identidad` del documento, con sus 6 tablas y los programas LEI y LLC. Valida el token de Supabase Auth y expone el estado del servicio y una consulta de prueba (`GET /api/programas`).
+- **MS-02:** desplegado en Render, con su propio proyecto de Supabase. Flyway montó el esquema `legalizacion` del documento, con sus 18 tablas. Por ahora expone solo el estado del servicio.
 - **Cliente web:** inicio de sesión con Supabase Auth y llamada de prueba a MS-01.
 
 ## Entregas
