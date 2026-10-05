@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: geprac-legalizacion
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: legalizacion
+
+  flyway:
+    enabled: true
+    schemas: legalizacion
+    locations: classpath:db/migration
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://txogxkmtihkqeowmlicm.supabase.co/auth/v1/.well-known/jwks.json
+          jws-algorithms: ES256
+
+server:
+  port: ${PORT:8081}
+  servlet:
+    context-path: /api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      access: read-only
