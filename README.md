@@ -96,13 +96,14 @@ Requisitos: JDK 21, Node.js 20.19 o 22.12 en adelante, y Git. Maven no hace falt
 
 ### Cliente web · `frontend/geprac-web`
 
-1. Copiar `.env.example` como `.env` y completar sus tres variables. Git también ignora este archivo.
+1. Copiar `.env.example` como `.env` y completar sus cuatro variables. Git también ignora este archivo.
 
    | Variable | Valor |
    |---|---|
    | `VITE_SUPABASE_URL` | URL del proyecto de Supabase |
    | `VITE_SUPABASE_ANON_KEY` | Llave pública (*anon*) del proyecto |
    | `VITE_API_ACADEMICO` | URL base de MS-01: `http://localhost:8080/api` en local |
+   | `VITE_API_LEGALIZACION` | URL base de MS-02: `http://localhost:8081/api` en local |
 
 2. Instalar las dependencias y arrancar:
 
@@ -111,7 +112,7 @@ Requisitos: JDK 21, Node.js 20.19 o 22.12 en adelante, y Git. Maven no hace falt
    npm run dev
    ```
 
-3. El cliente queda en `http://localhost:5173`, origen que la configuración CORS de MS-01 ya admite.
+3. El cliente queda en `http://localhost:5173`, origen que la configuración CORS de los dos microservicios ya admite.
 
 ## Variables de entorno en producción
 
@@ -126,7 +127,7 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 | Render · MS-02 | `SPRING_DATASOURCE_USERNAME` | Usuario del pooler: `postgres.` seguido del código del proyecto |
 | Render · MS-02 | `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de MS-02 |
 | Render · MS-02 | `PORT` | La asigna Render |
-| Vercel · cliente | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_ACADEMICO` | Las mismas del `.env` local, con la dirección pública de MS-01 |
+| Vercel · cliente | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_ACADEMICO`, `VITE_API_LEGALIZACION` | Las mismas del `.env` local, con las direcciones públicas de MS-01 y MS-02 |
 
 ## Despliegue
 

@@ -1,3 +1,9 @@
+/**
+ * Punto de entrada del cliente web de GEPRAC: carga Bootstrap, los estilos
+ * de la UDI y monta la aplicación en el elemento #root.
+ *
+ * @author José Fernando Rincón Barrios
+ */
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
