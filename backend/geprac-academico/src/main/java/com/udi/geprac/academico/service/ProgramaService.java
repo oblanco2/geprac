@@ -1,11 +1,17 @@
 package com.udi.geprac.academico.service;
 
-import com.udi.geprac.academico.domain.Programa;
+import com.udi.geprac.academico.dto.ProgramaDto;
 import com.udi.geprac.academico.repository.ProgramaRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
+/**
+ * Consulta de los programas académicos.
+ *
+ * @author Oscar Iván Blanco Díaz
+ */
 @Service
 public class ProgramaService {
 
@@ -15,17 +21,11 @@ public class ProgramaService {
         this.repositorio = repositorio;
     }
 
+    /** Los programas, ordenados por código. */
     @Transactional(readOnly = true)
-    public List<Programa> listar() {
-        return repositorio.findAll();
-    }
-
-    @Transactional
-    public Programa crear(Programa programa) {
-        if (repositorio.existsByCodigoIgnoreCase(programa.getCodigo())) {
-            throw new IllegalArgumentException(
-                "Ya existe un programa con el código " + programa.getCodigo());
-        }
-        return repositorio.save(programa);
+    public List<ProgramaDto> listar() {
+        return repositorio.findAll(Sort.by("codigo")).stream()
+            .map(ProgramaDto::de)
+            .toList();
     }
 }
