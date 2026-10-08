@@ -27,7 +27,7 @@ Dos microservicios con base de datos independiente, consumidos por un cliente we
 | Autenticación | Proveedor de identidad único para todo el software | Supabase Auth · JWT firmado con ES256 | Supabase |
 
 - El cliente obtiene el token en Supabase Auth y lo envía en cada petición (`Authorization: Bearer`). Cada microservicio lo valida por su cuenta contra las llaves públicas del proveedor, sin consultar al otro.
-- Los dos servicios se comunican en un solo punto: cuando el estudiante inicia la inscripción, MS-02 le solicita a MS-01 los datos del perfil.
+- Los dos servicios se comunican en dos puntos, siempre de MS-02 hacia MS-01: al iniciar la inscripción, MS-02 le solicita el expediente del estudiante (sus datos personales y su hoja de vida), y al designar el tutor de una práctica, le consulta el rol del usuario designado. Las pantallas que reúnen datos de los dos servicios las compone el cliente web.
 - MS-02 no declara claves foráneas hacia MS-01: guarda como valores los identificadores que cruzan la frontera.
 
 ## Estructura del repositorio
@@ -134,6 +134,7 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 - **MS-01:** Render construye la imagen con el `Dockerfile` de dos etapas de `backend/geprac-academico` —Maven compila el proyecto y una imagen mínima de Java 21 ejecuta el binario con un usuario sin privilegios— y la despliega con cada commit en la rama `develop`.
 - **MS-02:** igual que MS-01, con el `Dockerfile` de `backend/geprac-legalizacion`. Un filtro de construcción hace que solo se vuelva a desplegar cuando un commit en `develop` cambia esa carpeta.
 - **Cliente web:** Vercel.
+- **Token de acceso:** la migración V4 de MS-01 crea la función `identidad.claims_del_token`, que añade al token el rol, el programa y el identificador del estudiante; con eso cada microservicio autoriza sin consultar al otro. Se activa una sola vez en Supabase, en el proyecto de MS-01: *Authentication → Hooks → Customize Access Token (JWT) Claims*, tipo Postgres, esquema `identidad`, función `claims_del_token`.
 - El plan gratuito de Render suspende el servicio tras un rato sin uso. La primera petición puede tardar unos 50 segundos mientras despierta, y el cliente la espera hasta 60.
 
 | Componente | Dirección |
