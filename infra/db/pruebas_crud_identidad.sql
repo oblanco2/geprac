@@ -134,6 +134,10 @@ BEGIN
             'esperado', 'rechazada por uq_usuario_correo_institucional',
             'obtenido', pg_temp.intentar(
               $s$INSERT INTO identidad.usuario VALUES (gen_random_uuid(), 'Otra', 'prueba.crud@udi.edu.co', NULL, localtimestamp)$s$)),
+          jsonb_build_object('tabla', 'usuario', 'prueba', 'Asignar a un director un programa que no existe',
+            'esperado', 'rechazada por fk_usuario_programa',
+            'obtenido', pg_temp.intentar(format(
+              $s$UPDATE identidad.usuario SET rol = 'DIRECTOR', codigo_programa = 'NOEXISTE' WHERE id = %L$s$, v_otro))),
           jsonb_build_object('tabla', 'estudiante', 'prueba', 'Repetir el tipo y el número de documento',
             'esperado', 'rechazada por uq_estudiante_documento',
             'obtenido', pg_temp.intentar(format(
