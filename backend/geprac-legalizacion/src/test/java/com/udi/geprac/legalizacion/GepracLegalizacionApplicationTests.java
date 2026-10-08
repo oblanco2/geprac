@@ -2,21 +2,23 @@ package com.udi.geprac.legalizacion;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
- * La prueba de contexto se sustituye por esta comprobación mínima.
+ * Comprobación mínima de la clase de arranque.
  *
- * Arrancar el contexto completo exige conexión a la base de datos, que
- * durante la construcción no está disponible: la contraseña vive en
- * application-local.yml en desarrollo y en variables de entorno en Render.
+ * No levanta el contexto completo, porque eso exige conexión a la base de
+ * datos, que en desarrollo se configura en application-local.yml y en Render
+ * en variables de entorno. La prueba de la seguridad está en su propio
+ * paquete y no necesita base.
  *
- * Las pruebas de integración reales irán con Testcontainers más adelante.
+ * @author Darien Asdrwal Pesca Ojeda
  */
 class GepracLegalizacionApplicationTests {
 
-    @Test
-    void laClasePrincipalExiste() {
-        // Verifica que la clase de arranque está donde debe
-        org.junit.jupiter.api.Assertions.assertNotNull(
-            GepracLegalizacionApplication.class);
-    }
+	@Test
+	void laClasePrincipalExiste() {
+		assertNotNull(GepracLegalizacionApplication.class);
+	}
+
 }
