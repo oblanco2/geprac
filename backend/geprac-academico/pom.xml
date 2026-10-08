@@ -11,8 +11,8 @@
 	<groupId>com.udi.geprac</groupId>
 	<artifactId>geprac-academico</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>geprac-academico</name>
+	<description>GEPRAC · MS-01 Identidad y Perfil Académico</description>
 	<url/>
 	<licenses>
 		<license/>

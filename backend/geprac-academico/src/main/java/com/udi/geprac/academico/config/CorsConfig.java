@@ -16,7 +16,10 @@ import java.util.List;
  * En Spring Security 7 el .cors() de la cadena no siempre alcanza la
  * petición previa que envía el navegador: llega antes de que ese filtro
  * actúe y la respuesta sale sin las cabeceras necesarias. Registrarlo
- * con orden HIGHEST_PRECEDENCE garantiza que se atienda primero.
+ * con orden HIGHEST_PRECEDENCE garantiza que se atienda primero. Es la única
+ * configuración de CORS del servicio.
+ *
+ * @author Oscar Iván Blanco Díaz
  */
 @Configuration
 public class CorsConfig {
