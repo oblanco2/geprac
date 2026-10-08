@@ -2,8 +2,15 @@ import { useState } from 'react'
 import { supabase } from './lib/supabase'
 import cliente from './api/cliente'
 
+/**
+ * Pantalla de prueba de la integración: inicio de sesión con Supabase Auth y
+ * consulta de los programas a MS-01 con el token de la sesión. Las pantallas
+ * de los casos de uso la reemplazan en el prototipo funcional.
+ *
+ * @author José Fernando Rincón Barrios
+ */
 export default function App() {
-  const [correo, setCorreo] = useState('director@udi.edu.co')
+  const [correo, setCorreo] = useState('')
   const [clave, setClave] = useState('')
   const [sesion, setSesion] = useState(null)
   const [programas, setProgramas] = useState(null)

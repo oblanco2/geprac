@@ -1,3 +1,10 @@
+/**
+ * Cliente de Supabase Auth, el proveedor de identidad único del software.
+ * Toma la URL y la llave pública (anon) del archivo .env; nunca una llave
+ * privada, porque este código viaja al navegador.
+ *
+ * @author José Fernando Rincón Barrios
+ */
 import { createClient } from '@supabase/supabase-js'
 
 const url = import.meta.env.VITE_SUPABASE_URL
