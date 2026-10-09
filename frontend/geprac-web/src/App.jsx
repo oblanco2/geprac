@@ -1,117 +1,73 @@
-import { useState } from 'react'
-import { supabase } from './lib/supabase'
-import cliente from './api/cliente'
-
 /**
- * Pantalla de prueba de la integración: inicio de sesión con Supabase Auth y
- * consulta de los programas a MS-01 con el token de la sesión. Las pantallas
- * de los casos de uso la reemplazan en el prototipo funcional.
+ * El cliente web de GEPRAC: las rutas de los tres roles con las pantallas de los
+ * cinco casos de uso del prototipo funcional —CU-03, CU-06, CU-07, CU-08 y
+ * CU-09— y los proveedores que comparten todas: la sesión, los avisos y la
+ * ventana de confirmación. Las direcciones van tras #, así el hospedaje estático
+ * sirve cualquier pantalla y los botones atrás y adelante funcionan.
  *
  * @author José Fernando Rincón Barrios
  */
+import { Navigate, RouterProvider, createHashRouter } from 'react-router-dom'
+import SesionProveedor from './sesion/SesionProveedor'
+import AvisosProveedor from './componentes/AvisosProveedor'
+import DialogoProveedor from './componentes/DialogoProveedor'
+import Protegida from './componentes/Protegida'
+import Inicio from './paginas/Inicio'
+import Ingreso from './paginas/Ingreso'
+import MisPracticas from './paginas/estudiante/MisPracticas'
+import MisFormatos from './paginas/estudiante/MisFormatos'
+import Bandeja from './paginas/tutor/Bandeja'
+import Revisar from './paginas/tutor/Revisar'
+import BandejaAval from './paginas/director/BandejaAval'
+import Avalar from './paginas/director/Avalar'
+import Instituciones from './paginas/director/Instituciones'
+import EditorInstitucion from './paginas/director/EditorInstitucion'
+import HistorialPracticas from './paginas/comun/HistorialPracticas'
+
+const rutas = createHashRouter([
+  { path: '/', element: <Inicio /> },
+  { path: '/ingreso', element: <Ingreso /> },                                 // P-01
+  {
+    element: <Protegida roles={['ESTUDIANTE']} />,
+    children: [
+      { path: '/mis-practicas', element: <MisPracticas /> },                  // P-02 · CU-09
+      { path: '/mis-formatos', element: <MisFormatos /> },                    // P-09 · CU-08
+      { path: '/mis-formatos/:id', element: <MisFormatos /> },
+    ],
+  },
+  {
+    element: <Protegida roles={['TUTOR']} />,
+    children: [
+      { path: '/bandeja', element: <Bandeja /> },                             // P-10 · CU-06
+      { path: '/bandeja/:id', element: <Revisar /> },                         // P-11 · CU-06
+    ],
+  },
+  {
+    element: <Protegida roles={['DIRECTOR']} />,
+    children: [
+      { path: '/aval', element: <BandejaAval /> },                            // P-17 · CU-07
+      { path: '/aval/:id', element: <Avalar /> },                             // P-18 · CU-07
+      { path: '/instituciones', element: <Instituciones /> },                 // P-14 · CU-03
+      { path: '/instituciones/:id', element: <EditorInstitucion /> },         // P-15 · CU-03
+    ],
+  },
+  {
+    element: <Protegida roles={['TUTOR', 'DIRECTOR']} />,
+    children: [
+      { path: '/historial', element: <HistorialPracticas /> },                // P-19 · CU-09
+    ],
+  },
+  { path: '*', element: <Navigate to="/" replace /> },
+])
+
 export default function App() {
-  const [correo, setCorreo] = useState('')
-  const [clave, setClave] = useState('')
-  const [sesion, setSesion] = useState(null)
-  const [programas, setProgramas] = useState(null)
-  const [cargando, setCargando] = useState(false)
-  const [error, setError] = useState(null)
-
-  const entrar = async (e) => {
-    e.preventDefault()
-    setError(null)
-    setCargando(true)
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: correo,
-      password: clave,
-    })
-    setCargando(false)
-    if (error) setError(error.message)
-    else setSesion(data.session)
-  }
-
-  const consultar = async () => {
-    setError(null)
-    setCargando(true)
-    try {
-      const { data } = await cliente.get('/programas')
-      setProgramas(data)
-    } catch (err) {
-      setError(err.mensaje)
-    } finally {
-      setCargando(false)
-    }
-  }
-
-  const salir = async () => {
-    await supabase.auth.signOut()
-    setSesion(null)
-    setProgramas(null)
-  }
-
   return (
-    <div className="container py-5" style={{ maxWidth: '640px' }}>
-      <div className="mb-4">
-        <span className="d-inline-block borde-oro ps-2">
-          <h1 className="h3 fw-bold mb-0">GEPRAC</h1>
-        </span>
-        <p className="text-secondary small mb-0 mt-1">
-          Software para la Gestión de Prácticas Académicas
-        </p>
-      </div>
-
-      {!sesion ? (
-        <div className="card border-0 shadow-sm">
-          <div className="card-body p-4">
-            <h2 className="h5 mb-3">Ingresa a tu cuenta</h2>
-            <form onSubmit={entrar}>
-              <div className="mb-3">
-                <label htmlFor="correo" className="form-label small">Correo</label>
-                <input
-                  id="correo" type="email" className="form-control"
-                  value={correo} onChange={(e) => setCorreo(e.target.value)} required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="clave" className="form-label small">Contraseña</label>
-                <input
-                  id="clave" type="password" className="form-control"
-                  value={clave} onChange={(e) => setClave(e.target.value)} required
-                />
-              </div>
-              <button type="submit" className="btn btn-primary w-100" disabled={cargando}>
-                {cargando ? 'Verificando…' : 'Entrar'}
-              </button>
-            </form>
-          </div>
-        </div>
-      ) : (
-        <div className="card border-0 shadow-sm">
-          <div className="card-body p-4">
-            <div className="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <p className="mb-0 fw-semibold">{sesion.user.email}</p>
-                <p className="text-secondary small mb-0">Sesión activa</p>
-              </div>
-              <button className="btn btn-outline-secondary btn-sm" onClick={salir}>
-                Salir
-              </button>
-            </div>
-
-            <button className="btn btn-primary" onClick={consultar} disabled={cargando}>
-              {cargando ? 'Consultando…' : 'Consultar programas'}
-            </button>
-
-            {programas && (
-              <div className="alert alert-success mt-3 mb-0 small">
-                Respuesta del microservicio: <code>{JSON.stringify(programas)}</code>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {error && <div className="alert alert-danger mt-3 small">{error}</div>}
-    </div>
+    <AvisosProveedor>
+      <DialogoProveedor>
+        <SesionProveedor>
+          <RouterProvider router={rutas} />
+        </SesionProveedor>
+      </DialogoProveedor>
+    </AvisosProveedor>
   )
 }
