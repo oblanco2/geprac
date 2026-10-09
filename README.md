@@ -143,13 +143,37 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 | MS-01 | https://geprac-academico.onrender.com/api |
 | MS-02 | https://geprac-legalizacion.onrender.com/api |
 
+## Datos de la demostración
+
+Los cinco casos de uso del prototipo funcional parten de datos que, en el software, crean casos de uso que se programan para la entrega final: el rol de cada cuenta y los semestres con su tutor designado (CU-04), el registro del estudiante (CU-01), el catálogo de prácticas (CU-02) y las inscripciones enviadas (CU-05). Los dos archivos de `infra/db` los cargan, en este orden:
+
+1. **`semilla_identidad.sql`**, en el *SQL Editor* del proyecto de Supabase de MS-01. Antes, las tres cuentas deben existir en *Authentication → Users*. Asigna los roles —Oscar, director de LEI; Darien, tutor académico; José, estudiante— y registra al estudiante con su hoja de vida. Su última columna entrega tres líneas.
+2. **`semilla_legalizacion.sql`**, en el *SQL Editor* del proyecto de Supabase de MS-02, ya desplegado con la migración V2. En las líneas marcadas se copian las tres que entregó el archivo anterior. Carga los semestres 2025-2, 2026-1 y 2026-2, solo el último abierto; las ocho prácticas de LEI; ocho instituciones receptoras, y catorce inscripciones en los cinco estados: tres de José y once de estudiantes ficticios, sin cuenta, que solo aparecen en las bandejas y en el historial.
+
+Los dos archivos se pueden ejecutar las veces que haga falta sin duplicar nada, y ninguno lleva contraseñas. Para repetir la demostración desde el principio se ejecuta de nuevo `semilla_legalizacion.sql` con `volver_a_empezar` en `true`.
+
+| Cuenta | Rol | Lo que encuentra al ingresar |
+|---|---|---|
+| Oscar Iván Blanco Díaz | Director del Programa de LEI | Tres inscripciones por avalar (P-17), el catálogo de instituciones (P-14) y el historial del programa (P-19) |
+| Darien Asdrwal Pesca Ojeda | Tutor académico | Cinco inscripciones por revisar (P-10), entre ellas la de José, y el historial de sus prácticas (P-19) |
+| José Fernando Rincón Barrios | Estudiante Practicante | Sus ocho prácticas (P-02): la 1 y la 2 avaladas, con sus formatos (P-09), y la 3 en revisión |
+
 ## Estado del desarrollo
 
-Al 5 de octubre de 2026:
+Al segundo avance, el prototipo funcional opera de punta a punta cinco de los nueve casos de uso:
 
-- **MS-01:** desplegado en Render. Flyway montó el esquema `identidad` del documento, con sus 6 tablas y los programas LEI y LLC. Valida el token de Supabase Auth y expone el estado del servicio y una consulta de prueba (`GET /api/programas`).
-- **MS-02:** desplegado en Render, con su propio proyecto de Supabase. Flyway montó el esquema `legalizacion` del documento, con sus 18 tablas. Por ahora expone solo el estado del servicio.
-- **Cliente web:** inicio de sesión con Supabase Auth y llamada de prueba a MS-01.
+| Caso de uso | Pantallas | Rutas de MS-02 |
+|---|---|---|
+| CU-03 Gestionar instituciones receptoras | P-14, P-15 | `GET` y `POST /instituciones`, `PUT` y `DELETE /instituciones/{id}` |
+| CU-06 Revisar la inscripción | P-10, P-11 | `GET /revisiones/pendientes`, `POST /revisiones/{id}` |
+| CU-07 Avalar la inscripción | P-17, P-18 | `GET /avales/pendientes`, `POST /avales/{id}` |
+| CU-08 Emitir los formatos institucionales | P-09 | `GET` y `POST /formatos?inscripcion={id}`, `GET /formatos/{id}/archivo` |
+| CU-09 Consultar el historial de prácticas | P-02, P-19 | `GET /historial` |
+
+- **MS-01:** además del estado del servicio y de `GET /programas`, expone `GET /usuarios/me`, la cuenta de quien ingresa, que se registra en su primer ingreso, y `GET /usuarios`, la lista de cuentas con la que la Dirección ve el nombre del tutor que aprobó cada inscripción. La migración V4 añade al token el rol, el programa y el estudiante.
+- **MS-02:** las rutas de la tabla, cada una abierta solo al rol que le corresponde según el token. La migración V2 pone en vigencia las plantillas de los cuatro formatos, que se emiten en PDF.
+- **Cliente web:** las pantallas de la tabla y el ingreso (P-01), con la hoja de estilos del prototipo de alta fidelidad.
+- CU-01, CU-02, CU-04 y CU-05 se programan para la entrega final; en el prototipo, lo que producen lo aportan los datos de la demostración.
 
 ## Entregas
 
