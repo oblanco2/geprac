@@ -20,7 +20,7 @@ Dos microservicios con base de datos independiente, consumidos por un cliente we
 
 | Componente | Responsabilidad | Tecnología | Despliegue |
 |---|---|---|---|
-| Cliente web | Interfaz de los tres actores | React 19 · Vite 8 · Bootstrap 5.3 | Vercel |
+| Cliente web | Interfaz de los tres actores | React 19 · Vite 8 · React Router 7 | Vercel |
 | MS-01 Identidad y Perfil Académico | Usuarios y sus roles, programas académicos, estudiantes y hoja de vida | Java 21 · Spring Boot 4.1.1 · Spring Data JPA · Flyway | Render (Docker) |
 | MS-02 Legalización de Prácticas | Catálogo de prácticas, instituciones, periodos, inscripciones, formatos generados y revisiones | Java 21 · Spring Boot 4.1.1 · Spring Data JPA · Flyway | Render (Docker) |
 | Bases de datos | Esquema `identidad` (6 tablas) para MS-01 y esquema `legalizacion` (18 tablas) para MS-02, en proyectos separados | PostgreSQL 17 | Supabase |
