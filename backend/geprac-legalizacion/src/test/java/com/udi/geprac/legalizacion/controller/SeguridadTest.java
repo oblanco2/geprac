@@ -1,6 +1,8 @@
 package com.udi.geprac.legalizacion.controller;
 
 import com.udi.geprac.legalizacion.config.SecurityConfig;
+import com.udi.geprac.legalizacion.service.InstitucionService;
+import com.udi.geprac.legalizacion.service.RevisionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -29,6 +31,12 @@ class SeguridadTest {
 
     @MockitoBean
     private JwtDecoder decodificador;
+
+    @MockitoBean
+    private InstitucionService instituciones;
+
+    @MockitoBean
+    private RevisionService revisiones;
 
     @Test
     void sinTokenRespondeNoAutorizado() throws Exception {

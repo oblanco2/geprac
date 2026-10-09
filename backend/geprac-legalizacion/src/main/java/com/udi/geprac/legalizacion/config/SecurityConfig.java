@@ -31,6 +31,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                // CU-03: el director mantiene las instituciones; CU-06: el tutor revisa
+                .requestMatchers("/instituciones/**").hasRole("DIRECTOR")
+                .requestMatchers("/revisiones/**").hasRole("TUTOR")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth -> oauth.jwt(jwt ->
                 jwt.jwtAuthenticationConverter(convertidorDeRoles())));
