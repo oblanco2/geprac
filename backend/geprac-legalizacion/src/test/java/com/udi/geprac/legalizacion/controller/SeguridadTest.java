@@ -1,6 +1,9 @@
 package com.udi.geprac.legalizacion.controller;
 
 import com.udi.geprac.legalizacion.config.SecurityConfig;
+import com.udi.geprac.legalizacion.service.AvalService;
+import com.udi.geprac.legalizacion.service.FormatoService;
+import com.udi.geprac.legalizacion.service.HistorialService;
 import com.udi.geprac.legalizacion.service.InstitucionService;
 import com.udi.geprac.legalizacion.service.RevisionService;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,15 @@ class SeguridadTest {
 
     @MockitoBean
     private RevisionService revisiones;
+
+    @MockitoBean
+    private AvalService avales;
+
+    @MockitoBean
+    private FormatoService formatos;
+
+    @MockitoBean
+    private HistorialService historial;
 
     @Test
     void sinTokenRespondeNoAutorizado() throws Exception {

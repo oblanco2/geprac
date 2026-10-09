@@ -1,0 +1,37 @@
+# ══════════════════════════════════════════════════════════════════
+# GEPRAC · Plantilla del formato PR-05 · versión 1
+# Reproduce los campos del acta de compromiso entre el estudiante, la
+# institución receptora y la universidad. La diligencia MS-02 con la copia
+# que guarda la inscripción (CU-08). {campo!} es un dato obligatorio.
+# Autor: Darien Asdrwal Pesca Ojeda · modelo de datos y MS-02
+# ══════════════════════════════════════════════════════════════════
+@titulo ACTA DE COMPROMISO DE LA PRÁCTICA
+@codigo PR-05
+
+= Partes
+| Estudiante: {nombres!} {apellidos!} | Documento: {tipoDocumento!} {numeroDocumento!} | Programa: {nombrePrograma!} |
+| Institución receptora: {institucionRazonSocial!} | NIT: {institucionNit} | Representante legal: {institucionRepresentante} |
+| Tutor del escenario: {contactoNombre!} | Cargo: {contactoCargo!} |
+| Práctica: {ordenPractica!} · {nombrePractica!} | Inicio: {fechaInicio!} | Finalización: {fechaFin!} |
+
+El estudiante {nombres!} {apellidos!}, {institucionRazonSocial!} como institución receptora y la Universidad de Investigación y Desarrollo acuerdan los siguientes compromisos para el desarrollo de la práctica {ordenPractica!} · {nombrePractica!}, entre el {fechaInicio!} y el {fechaFin!}.
+
+= Compromisos del estudiante
+• Cumplir el horario y las actividades acordados con la institución receptora.
+• Seguir las orientaciones del tutor del escenario y del tutor académico.
+• Guardar la reserva sobre la información de los niños, las familias y la institución que conozca durante la práctica.
+• Informar a la Dirección del Programa cualquier novedad que afecte el desarrollo de la práctica.
+
+= Compromisos de la institución receptora
+• Facilitar al estudiante los espacios y la información que requieren las actividades de la práctica.
+• Designar como tutor del escenario a la persona indicada en este documento y avisar a la Universidad si cambia.
+• Certificar el cumplimiento del estudiante al finalizar la práctica.
+
+= Compromisos de la universidad
+• Asignar un tutor académico que acompañe y evalúe la práctica.
+• Verificar la afiliación del estudiante al Sistema General de Riesgos Laborales, en los términos del Decreto 055 de 2015.
+• Atender las novedades que reporten el estudiante o la institución receptora.
+
+~
+{ciudadEmision}, {fechaEmision}.
+_ {nombres} {apellidos}\nEstudiante | {contactoNombre}\nInstitución receptora | Dirección del Programa\nUniversidad
