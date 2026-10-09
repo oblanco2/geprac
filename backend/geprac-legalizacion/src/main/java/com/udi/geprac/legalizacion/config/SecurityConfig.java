@@ -34,6 +34,11 @@ public class SecurityConfig {
                 // CU-03: el director mantiene las instituciones; CU-06: el tutor revisa
                 .requestMatchers("/instituciones/**").hasRole("DIRECTOR")
                 .requestMatchers("/revisiones/**").hasRole("TUTOR")
+                // CU-07: el director avala; CU-08: el estudiante emite sus formatos;
+                // CU-09: los tres roles consultan el historial, cada uno con su alcance
+                .requestMatchers("/avales/**").hasRole("DIRECTOR")
+                .requestMatchers("/formatos/**").hasRole("ESTUDIANTE")
+                .requestMatchers("/historial/**").hasAnyRole("ESTUDIANTE", "TUTOR", "DIRECTOR")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth -> oauth.jwt(jwt ->
                 jwt.jwtAuthenticationConverter(convertidorDeRoles())));

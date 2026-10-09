@@ -10,8 +10,9 @@ import java.util.List;
  * Inscripción de una práctica por un estudiante en un semestre: tabla
  * inscripcion del esquema legalizacion. Es el expediente completo de la
  * legalización: al crearse (CU-05) copia los datos del estudiante y el
- * contenido de la práctica, y desde ahí la revisa el tutor (CU-06). El
- * estudiante es un registro de MS-01 y se guarda como valor.
+ * contenido de la práctica, y desde ahí la revisan el tutor (CU-06) y la
+ * Dirección (CU-07). El estudiante es un registro de MS-01 y se guarda como
+ * valor.
  *
  * @author Darien Asdrwal Pesca Ojeda
  */
@@ -85,12 +86,21 @@ public class Inscripcion {
     @OrderBy("fecha")
     private List<Revision> revisiones = new ArrayList<>();
 
+    @OneToOne(mappedBy = "inscripcion")
+    private Aval aval;
+
     protected Inscripcion() { }   // exigido por JPA
 
     /** CU-06, paso 8: el resultado de la revisión cambia el estado. */
     public void resolver(Revision revision) {
         revisiones.add(revision);
         estado = revision.getResultado() == ResultadoRevision.APROBADA ? EstadoInscripcion.APROBADA : EstadoInscripcion.DEVUELTA;
+    }
+
+    /** CU-07, paso 8: con el aval la inscripción queda avalada y se pueden emitir sus formatos. */
+    public void avalar(Aval aval) {
+        this.aval = aval;
+        estado = EstadoInscripcion.AVALADA;
     }
 
     /** El motivo de la última devolución, mientras la inscripción siga devuelta. */
@@ -119,4 +129,5 @@ public class Inscripcion {
     public List<InscripcionExperiencia> getExperiencias()  { return experiencias; }
     public List<InscripcionReferencia> getReferencias()    { return referencias; }
     public List<Revision> getRevisiones()                  { return revisiones; }
+    public Aval getAval()                                  { return aval; }
 }
