@@ -15,7 +15,9 @@ import org.springframework.security.web.SecurityFilterChain;
  * Los tokens los emite Supabase Auth; aquí solo se validan contra su JWKS
  * (ver {@link JwtConfig}). El rol del usuario viaja en el token, en el claim
  * «rol», y se convierte en la autoridad ROLE_DIRECTOR, ROLE_TUTOR o
- * ROLE_ESTUDIANTE. CORS lo resuelve {@link CorsConfig} antes de esta cadena.
+ * ROLE_ESTUDIANTE. La cuenta propia y los programas los consulta cualquier
+ * usuario autenticado, incluso sin rol; la lista de cuentas, solo el director.
+ * CORS lo resuelve {@link CorsConfig} antes de esta cadena.
  *
  * @author Oscar Iván Blanco Díaz
  */
@@ -30,6 +32,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                .requestMatchers(HttpMethod.GET, "/usuarios").hasRole("DIRECTOR")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth -> oauth.jwt(jwt ->
                 jwt.jwtAuthenticationConverter(convertidorDeRoles())));
