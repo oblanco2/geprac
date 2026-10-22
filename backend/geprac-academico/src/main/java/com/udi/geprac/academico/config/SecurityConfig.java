@@ -16,7 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
  * (ver {@link JwtConfig}). El rol del usuario viaja en el token, en el claim
  * «rol», y se convierte en la autoridad ROLE_DIRECTOR, ROLE_TUTOR o
  * ROLE_ESTUDIANTE. La cuenta propia y los programas los consulta cualquier
- * usuario autenticado, incluso sin rol; la lista de cuentas, solo el director.
+ * usuario autenticado, incluso sin rol; la lista de cuentas, solo el director,
+ * y el perfil y la hoja de vida (CU-01), solo el estudiante.
  * CORS lo resuelve {@link CorsConfig} antes de esta cadena.
  *
  * @author Oscar Iván Blanco Díaz
@@ -33,6 +34,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 .requestMatchers(HttpMethod.GET, "/usuarios").hasRole("DIRECTOR")
+                .requestMatchers("/estudiantes/**").hasRole("ESTUDIANTE")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth -> oauth.jwt(jwt ->
                 jwt.jwtAuthenticationConverter(convertidorDeRoles())));
