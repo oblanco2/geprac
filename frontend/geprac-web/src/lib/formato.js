@@ -19,6 +19,9 @@ export const ESTADOS = {
   avalada: { texto: 'Avalada', sentido: 'sus formatos ya se pueden emitir' },
 }
 
+/** Las opciones de un filtro por estado, [valor, texto], en el orden de ESTADOS. */
+export const opcionesEstado = (claves = Object.keys(ESTADOS)) => claves.map((k) => [k.toUpperCase(), ESTADOS[k].texto])
+
 export const SEMESTRES_PLAN = ['Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo']
 export const ORDINALES = ['primer', 'segundo', 'tercer', 'cuarto', 'quinto', 'sexto', 'séptimo', 'octavo']
 

@@ -1,9 +1,10 @@
 /**
- * El marco de todas las pantallas, como en el prototipo: la barra con el
- * contexto y la cuenta, el menú del rol con las opciones que nombran los casos
- * de uso, el título de la pantalla —que recibe el foco al llegar, para los
- * lectores de pantalla— y el cuerpo. Si el software llevó al usuario a esta
- * pantalla con un aviso, lo presenta arriba.
+ * El marco de todas las pantallas, como en el prototipo: la barra con la marca
+ * del software, el contexto y la cuenta, el menú del rol con las opciones que
+ * nombran los casos de uso, el título de la pantalla —que recibe el foco al
+ * llegar, para los lectores de pantalla—, el cuerpo y el pie con los derechos
+ * de autor. Si el software llevó al usuario a esta pantalla con un aviso, lo
+ * presenta arriba.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -46,8 +47,20 @@ export default function Marco({ titulo, ctx = '', menu, children }) {
         <h1 className="sr">GEPRAC · Gestión de Prácticas Académicas</h1>
         <div className="marco">
           <header className="barra">
-            <span className="logo">GEPRAC</span>
-            <span className="ctx">{ctx}</span>
+            <span className="marca-app">
+              <span className="emblema" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <rect x="5" y="3.5" width="14" height="17.5" rx="2.5" fill="none" stroke="currentColor" strokeWidth="1.7" />
+                  <path d="M9 2.5h6v2.2a.8.8 0 0 1-.8.8H9.8a.8.8 0 0 1-.8-.8z" fill="currentColor" />
+                  <path d="M8.6 13.2l2.3 2.3 4.6-4.9" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span className="nombre">
+                <span className="logo">GEPRAC</span>
+                <span className="lema">Gestión de Prácticas Académicas</span>
+              </span>
+            </span>
+            {ctx && <span className="ctx">{ctx}</span>}
             {cuenta && (
               <div className="rol">
                 <span>{cuenta.nombrePresentacion} · {PAPEL[cuenta.rol]}</span>
@@ -70,6 +83,10 @@ export default function Marco({ titulo, ctx = '', menu, children }) {
             {llegada && <Aviso tipo={llegada.tipo} negrita={llegada.negrita}>{llegada.texto}</Aviso>}
             {children}
           </div>
+          <footer className="pie-app">
+            <span>© {new Date().getFullYear()} <b>GEPRAC</b> · Gestión de Prácticas Académicas</span>
+            <span>Universidad de Investigación y Desarrollo (UDI) · Todos los derechos reservados</span>
+          </footer>
         </div>
       </main>
     </div>

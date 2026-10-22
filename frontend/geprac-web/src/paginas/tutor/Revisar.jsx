@@ -2,15 +2,16 @@
  * P-11 · Revisar inscripción (CU-06, RF-11). Los datos de la inscripción, el
  * contenido precargado y la institución receptora, con las dos salidas de la
  * revisión: aprobarla, o devolverla con el motivo, que es obligatorio. Una
- * inscripción que no está en la bandeja del tutor no se presenta (excepción 3.1).
+ * inscripción que no está en la bandeja del tutor no se presenta (excepción 3.1),
+ * y una que ya fue resuelta —aprobada, devuelta o avalada— solo se consulta.
  *
  * @author José Fernando Rincón Barrios
  */
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { listarPendientes, registrarRevision } from '../../api/legalizacion'
+import { listarBandeja, registrarRevision } from '../../api/legalizacion'
 import { useAvisar, useConfirmar } from '../../sesion/contexto'
-import { SEMESTRES_PLAN, fecha } from '../../lib/formato'
+import { ESTADOS, SEMESTRES_PLAN, fecha } from '../../lib/formato'
 import Marco from '../../componentes/Marco'
 import Historial from '../../componentes/Historial'
 import { useSalidaProtegida } from '../../componentes/salida'
@@ -31,14 +32,17 @@ export default function Revisar() {
 
   useEffect(() => {
     let vigente = true
-    listarPendientes()
+    listarBandeja()
       .then((l) => vigente && setEstado({ lista: true, insc: l.find((i) => String(i.id) === id) || null, error: null }))
       .catch((e) => vigente && setEstado({ lista: true, insc: null, error: e.estado === 409 ? null : e.mensaje }))
     return () => { vigente = false }
   }, [id])
 
+  // ya resuelta: se consulta sin la decisión, que solo cabe sobre una enviada
+  const resuelta = estado.insc != null && estado.insc.estado !== 'ENVIADA'
   const marco = (contenido) => (
-    <Marco titulo="Revisar inscripción" ctx={estado.insc ? `Semestre ${estado.insc.semestre}` : 'Semestre abierto'} menu="/bandeja">{contenido}</Marco>
+    <Marco titulo={resuelta ? 'Consultar inscripción' : 'Revisar inscripción'}
+      ctx={estado.insc ? `Semestre ${estado.insc.semestre}` : 'Semestre abierto'} menu="/bandeja">{contenido}</Marco>
   )
   if (!estado.lista) return marco(<Cargando />)
   if (estado.error) return marco(<Aviso tipo="err" negrita="No fue posible consultar la inscripción.">{estado.error}</Aviso>)
@@ -47,6 +51,7 @@ export default function Revisar() {
   const i = estado.insc
   const d = i.datos
   const estudiante = `${d.nombres} ${d.apellidos}`
+  const significado = ESTADOS[i.estado.toLowerCase()]
 
   const resolver = async (resultado) => {
     if (resultado === 'DEVUELTA' && !motivo.trim()) {
@@ -87,6 +92,11 @@ export default function Revisar() {
         <span><Estado estado={i.estado} /> <span className="pill">Recibida el {fecha(i.enviadaEn)}</span></span>
       </div>
       <div className="sep" />
+      {resuelta && (
+        <Aviso tipo="info" negrita={`Esta inscripción ya fue revisada: está ${significado.texto.toLowerCase()}.`}>
+          {significado.sentido.charAt(0).toUpperCase() + significado.sentido.slice(1)}. Aquí solo se consulta.
+        </Aviso>
+      )}
       <Bloque titulo="Estudiante">
         <div className="grid g4">
           <Lectura etiqueta="Documento" valor={`${d.tipoDocumento} ${d.numeroDocumento}`} />
@@ -120,15 +130,19 @@ export default function Revisar() {
         </details>
       </Bloque>
       {i.revisiones.length > 0 && <Bloque titulo="Historial"><Historial insc={i} estudiante={estudiante} /></Bloque>}
-      <Bloque titulo="Decisión">
-        <Area etiqueta="Motivo de la devolución · obligatorio si devuelve" maxlen={600} largo={motivo.length} maxLength={600}
-          placeholder="Escriba qué debe corregir el estudiante…" value={motivo} error={error}
-          onChange={(e) => { setMotivo(e.target.value); setError(null) }} />
-      </Bloque>
+      {!resuelta && (
+        <Bloque titulo="Decisión">
+          <Area etiqueta="Motivo de la devolución · obligatorio si devuelve" maxlen={600} largo={motivo.length} maxLength={600}
+            placeholder="Escriba qué debe corregir el estudiante…" value={motivo} error={error}
+            onChange={(e) => { setMotivo(e.target.value); setError(null) }} />
+        </Bloque>
+      )}
       <div className="acciones der">
         <Boton tipo="g" disabled={!!espera} onClick={() => navigate('/bandeja')}>Volver a la bandeja</Boton>
-        <Boton tipo="d" espera={espera === 'DEVUELTA'} textoEspera="Registrando…" disabled={!!espera} onClick={() => resolver('DEVUELTA')}>Devolver</Boton>
-        <Boton tipo="ok" espera={espera === 'APROBADA'} textoEspera="Registrando…" disabled={!!espera} onClick={() => resolver('APROBADA')}>Aprobar</Boton>
+        {!resuelta && <>
+          <Boton tipo="d" espera={espera === 'DEVUELTA'} textoEspera="Registrando…" disabled={!!espera} onClick={() => resolver('DEVUELTA')}>Devolver</Boton>
+          <Boton tipo="ok" espera={espera === 'APROBADA'} textoEspera="Registrando…" disabled={!!espera} onClick={() => resolver('APROBADA')}>Aprobar</Boton>
+        </>}
       </div>
     </>,
   )

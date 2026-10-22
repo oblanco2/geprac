@@ -39,9 +39,14 @@ body{margin:0;background:var(--fondo);color:var(--tinta);font-size:var(--t-m);li
 .lienzo{flex:1;padding:26px 32px 60px;min-width:0}
 
 .marco{background:var(--blanco);border:1px solid var(--linea);border-radius:var(--rm);overflow:hidden;box-shadow:0 1px 2px rgba(18,38,63,.06),0 8px 24px rgba(18,38,63,.05);max-width:1040px}
-.barra{background:var(--marca);color:var(--blanco);padding:10px 18px;display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap}
-.barra .logo{font-weight:700;letter-spacing:.6px;font-size:var(--t-m)}
-.barra .ctx{font-size:var(--t-xs)}
+.barra{background:linear-gradient(115deg,var(--marca) 0%,var(--marca) 45%,var(--marca-h) 100%);color:var(--blanco);padding:12px 20px;display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;border-bottom:3px solid var(--marca-h)}
+.marca-app{display:flex;align-items:center;gap:12px}
+.marca-app .emblema{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);display:grid;place-items:center;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+.marca-app .emblema svg{width:26px;height:26px;display:block}
+.marca-app .nombre{display:flex;flex-direction:column;line-height:1.1}
+.barra .logo{font-weight:800;letter-spacing:2.5px;font-size:var(--t-xxl)}
+.barra .lema{font-size:var(--t-xs);letter-spacing:.3px;margin-top:3px;color:rgba(255,255,255,.88)}
+.barra .ctx{font-size:var(--t-xs);font-weight:600;padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);white-space:nowrap}
 .barra .rol{margin-left:auto;font-size:var(--t-xs);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .avatar{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:var(--t-xs);font-weight:700}
 .salir{background:transparent;color:var(--blanco);border:1px solid rgba(255,255,255,.7);border-radius:var(--s);padding:5px 10px;min-height:30px;font:inherit;font-size:var(--t-xs);font-weight:600;cursor:pointer}
@@ -72,6 +77,8 @@ h3.sec{font-size:var(--t-s);text-transform:uppercase;letter-spacing:.6px;color:v
 .campo{min-width:0}
 .campo label,.campo .lbl{display:block;font-size:var(--t-xs);color:var(--tinta-2);margin-bottom:5px;font-weight:600}
 .campo input,.campo select,.campo textarea,td input,td select{width:100%;border:1px solid var(--tinta-3);border-radius:var(--s);padding:9px 11px;background:var(--blanco);min-height:40px;font:inherit;font-size:var(--t-s);color:var(--tinta);line-height:1.4}
+.campo select,td select{cursor:pointer}
+.campo select:disabled,td select:disabled{cursor:not-allowed}
 .campo textarea{min-height:88px;resize:vertical}
 .campo textarea.auto{overflow:hidden}
 .campo input:focus,.campo select:focus,.campo textarea:focus,td input:focus,td select:focus,.item textarea:focus{outline:2px solid var(--marca);outline-offset:1px;border-color:var(--marca)}
@@ -176,9 +183,16 @@ a.tarj:hover,a.tarj:focus-visible,button.tarj:hover,button.tarj:focus-visible{bo
 .avance{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
 .avance h3.sec{margin:0}
 
+.nota-filtros{display:flex;align-items:flex-start;gap:8px;margin:0 0 12px;font-size:var(--t-s);color:var(--tinta-2)}
+.nota-filtros svg{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:var(--marca)}
+.nota-filtros b{color:var(--tinta);font-weight:600}
 .filtros{display:flex;gap:10px 12px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end}
 .filtros .campo{flex:0 1 210px;min-width:170px}
 .filtros .empuja{margin-left:auto;display:flex;align-items:center;gap:10px}
+.filtros.compactos .campo{flex:1 1 150px;min-width:140px}
+.resumen-estados{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.resumen-estados .total{font-weight:600;margin-right:4px}
+.resumen-estados .et{font-size:var(--t-s);padding:4px 12px}
 
 .lista{border:1px solid var(--linea);border-radius:var(--r);margin:0;padding:0;list-style:none}
 .item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--linea)}
@@ -295,7 +309,14 @@ details.detalle .lista{margin-bottom:12px}
 .app.cliente .marco{max-width:1100px;margin:0 auto}
 .tit-app{font-size:var(--t-xl);margin:0;padding:18px 22px 0}
 .tit-app:focus{outline:none}
+.pie-app{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 18px;padding:14px 22px;border-top:1px solid var(--linea);background:var(--fondo);font-size:var(--t-xs);color:var(--tinta-3)}
+.pie-app b{color:var(--marca);letter-spacing:.6px}
 @media(max-width:900px){
   .app.cliente .lienzo{padding:14px 10px 30px}
   .tit-app{padding:14px 16px 0}
+}
+@media(max-width:640px){
+  .barra{padding:12px 16px}
+  .filtros.compactos .campo{flex:1 1 100%}
+  .pie-app{flex-direction:column;align-items:flex-start;padding:12px 16px}
 }

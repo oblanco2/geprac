@@ -118,6 +118,18 @@ export function Estado({ estado, texto }) {
   return <span className={`et ${clave}`}>{texto || ESTADOS[clave]?.texto || estado}</span>
 }
 
+/** La nota que va encima de los filtros: le dice al usuario por cuáles datos puede filtrar. */
+export function NotaFiltros({ children }) {
+  return (
+    <p className="nota-filtros">
+      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M2 3h12L9.4 8.4v4.1L6.6 14V8.4z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      </svg>
+      <span>{children}</span>
+    </p>
+  )
+}
+
 /** Encabezado de un bloque, con una acción opcional a la derecha. */
 export function Bloque({ titulo, accion, children }) {
   return (
