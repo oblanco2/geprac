@@ -33,6 +33,12 @@ server:
   servlet:
     context-path: /api
 
+# MS-01, al que MS-02 le consulta el rol del tutor designado (CU-04).
+# Sin la variable IDENTIDAD_URL es el de Render; en local se usa http://localhost:8080/api.
+geprac:
+  identidad:
+    url: ${IDENTIDAD_URL:https://geprac-academico.onrender.com/api}
+
 management:
   endpoints:
     web:
