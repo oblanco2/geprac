@@ -57,6 +57,21 @@ class RevisionControllerTest {
     }
 
     @Test
+    void elEstudianteNoAbreLaBandejaConEstados() throws Exception {
+        mvc.perform(get("/revisiones").with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ESTUDIANTE"))))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void elTutorAbreSuBandejaConEstados() throws Exception {
+        given(servicio.listarBandeja()).willReturn(List.of());
+
+        mvc.perform(get("/revisiones").with(jwt().authorities(TUTOR)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
     void unaRevisionSinResultadoNoSeRegistra() throws Exception {
         mvc.perform(post("/revisiones/4").with(jwt().authorities(TUTOR)).contentType(MediaType.APPLICATION_JSON)
                 .content("{\"resultado\":\" \",\"motivo\":\"Falta la EPS\"}"))

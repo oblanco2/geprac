@@ -26,6 +26,13 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
     List<Inscripcion> findBySemestreAndPracticaInAndEstado(Semestre semestre, Collection<Practica> practicas,
                                                            EstadoInscripcion estado);
 
+    /**
+     * Las inscripciones de unas prácticas en un semestre, menos las de un
+     * estado: la bandeja del tutor con todos sus estados, sin los borradores.
+     */
+    List<Inscripcion> findBySemestreAndPracticaInAndEstadoNot(Semestre semestre, Collection<Practica> practicas,
+                                                              EstadoInscripcion estado);
+
     /** Las inscripciones de un programa en un estado: la bandeja de aval de la Dirección (CU-07, paso 2). */
     List<Inscripcion> findByEstadoAndPracticaCodigoPrograma(EstadoInscripcion estado, String codigoPrograma);
 

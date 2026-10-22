@@ -23,6 +23,12 @@ public class RevisionController {
         this.servicio = servicio;
     }
 
+    /** GET /api/revisiones: la bandeja de revisión con todos sus estados, para filtrarla por estado (P-10). */
+    @GetMapping
+    public List<InscripcionDto> listarBandeja() {
+        return servicio.listarBandeja();
+    }
+
     /** GET /api/revisiones/pendientes: la bandeja de revisión (P-10). */
     @GetMapping("/pendientes")
     public List<InscripcionDto> listarPendientes() {

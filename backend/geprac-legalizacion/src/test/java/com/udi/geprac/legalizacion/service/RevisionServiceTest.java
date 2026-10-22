@@ -10,6 +10,7 @@ import com.udi.geprac.legalizacion.dto.InscripcionDto;
 import com.udi.geprac.legalizacion.repository.InscripcionRepository;
 import com.udi.geprac.legalizacion.repository.RevisionRepository;
 import com.udi.geprac.legalizacion.repository.TutorPracticaRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -74,6 +75,25 @@ class RevisionServiceTest {
             .willReturn(List.of(enviada(designada)));
 
         assertThat(servicio.listarPendientes()).extracting(InscripcionDto::estado).containsExactly("ENVIADA");
+    }
+
+    @Test
+    void laBandejaConEstadosTraeTodasMenosLosBorradoresEnElOrdenDeEnvio() {
+        Inscripcion devuelta = inscripcion(5L, 8L, designada, semestre, EstadoInscripcion.DEVUELTA);
+        poner(devuelta, "enviadaEn", LocalDateTime.of(2026, 9, 10, 8, 0));
+        given(inscripciones.findBySemestreAndPracticaInAndEstadoNot(semestre, List.of(designada), EstadoInscripcion.BORRADOR))
+            .willReturn(List.of(enviada(designada), devuelta));
+
+        assertThat(servicio.listarBandeja()).extracting(InscripcionDto::estado)
+            .as("de la que se envió primero a la más reciente").containsExactly("DEVUELTA", "ENVIADA");
+    }
+
+    @Test
+    void sinDesignacionesTampocoHayBandejaConEstados() {
+        given(designaciones.findByTutorIdAndSemestreAbiertoTrue(TUTOR)).willReturn(List.of());
+
+        assertThatThrownBy(servicio::listarBandeja)
+            .isInstanceOf(IllegalStateException.class).hasMessageContaining("no le ha designado prácticas");
     }
 
     @Test

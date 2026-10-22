@@ -19,9 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * CU-06 · Revisar la inscripción. El alcance del tutor lo fijan sus
- * designaciones en el semestre abierto: solo ve y resuelve las inscripciones
- * enviadas de las prácticas que tiene designadas, y ningún dato de la petición
- * lo amplía. La revisión y el cambio de estado se guardan juntos o no se guarda
+ * designaciones en el semestre abierto: solo ve las inscripciones de las
+ * prácticas que tiene designadas, solo resuelve las enviadas, y ningún dato de
+ * la petición lo amplía. La revisión y el cambio de estado se guardan juntos o no se guarda
  * ninguno (excepción 8.1).
  *
  * @author Darien Asdrwal Pesca Ojeda
@@ -49,6 +49,24 @@ public class RevisionService {
         return inscripciones.findBySemestreAndPracticaInAndEstado(suyas.get(0).getSemestre(), practicas,
                 EstadoInscripcion.ENVIADA).stream()
             .sorted(Comparator.comparing(Inscripcion::getEnviadaEn))
+            .map(InscripcionDto::de)
+            .toList();
+    }
+
+    /**
+     * La bandeja con su filtro por estado: las inscripciones de sus prácticas en
+     * el semestre abierto que ya le llegaron, las enviadas que esperan su
+     * revisión y las que ya resolvió, aprobadas, devueltas o avaladas, en el
+     * orden en que se enviaron. Los borradores no salen: el estudiante todavía
+     * no los ha enviado. Solo consulta; resolver sigue siendo solo de las enviadas.
+     */
+    @Transactional(readOnly = true)
+    public List<InscripcionDto> listarBandeja() {
+        List<TutorPractica> suyas = designadas();
+        List<Practica> practicas = suyas.stream().map(TutorPractica::getPractica).toList();
+        return inscripciones.findBySemestreAndPracticaInAndEstadoNot(suyas.get(0).getSemestre(), practicas,
+                EstadoInscripcion.BORRADOR).stream()
+            .sorted(Comparator.comparing(Inscripcion::getEnviadaEn, Comparator.nullsLast(Comparator.naturalOrder())))
             .map(InscripcionDto::de)
             .toList();
     }
