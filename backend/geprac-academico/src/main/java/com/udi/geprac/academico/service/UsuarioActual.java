@@ -29,6 +29,11 @@ public final class UsuarioActual {
         return UUID.fromString(token().getSubject());
     }
 
+    /** El programa del token: el que dirige el director o en el que estudia el estudiante. */
+    public static String programa() {
+        return token().getClaimAsString("programa");
+    }
+
     /** El correo institucional con el que ingresó. */
     public static String correo() {
         return token().getClaimAsString("email");
