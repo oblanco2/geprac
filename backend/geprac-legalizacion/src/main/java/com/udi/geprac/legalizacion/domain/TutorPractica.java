@@ -32,6 +32,18 @@ public class TutorPractica {
 
     protected TutorPractica() { }   // exigido por JPA
 
+    /** CU-04, paso 11: el tutor de una práctica en el semestre. */
+    public TutorPractica(Semestre semestre, Practica practica, UUID tutorId) {
+        this.semestre = semestre;
+        this.practica = practica;
+        this.tutorId = tutorId;
+    }
+
+    /** CU-04, variación 9.1: las inscripciones ya enviadas pasan a la bandeja del nuevo tutor. */
+    public void reasignar(UUID tutorId) {
+        this.tutorId = tutorId;
+    }
+
     public Long getId()           { return id; }
     public Semestre getSemestre() { return semestre; }
     public Practica getPractica() { return practica; }

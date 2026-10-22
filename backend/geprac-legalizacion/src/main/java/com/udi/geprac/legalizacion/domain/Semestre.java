@@ -31,6 +31,19 @@ public class Semestre {
 
     protected Semestre() { }   // exigido por JPA
 
+    /** CU-04, paso 8: el semestre nace abierto. */
+    public Semestre(String codigo, LocalDate fechaInicio, LocalDate fechaCierre) {
+        this.codigo = codigo;
+        this.fechaInicio = fechaInicio;
+        this.fechaCierre = fechaCierre;
+        this.abierto = true;
+    }
+
+    /** CU-04, variación 2.2: mientras no se abra otro, ningún estudiante puede inscribir. */
+    public void cerrar() {
+        this.abierto = false;
+    }
+
     public Long getId()               { return id; }
     public String getCodigo()         { return codigo; }
     public LocalDate getFechaInicio() { return fechaInicio; }

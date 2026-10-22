@@ -5,7 +5,9 @@ import com.udi.geprac.legalizacion.service.AvalService;
 import com.udi.geprac.legalizacion.service.FormatoService;
 import com.udi.geprac.legalizacion.service.HistorialService;
 import com.udi.geprac.legalizacion.service.InstitucionService;
+import com.udi.geprac.legalizacion.service.PracticaService;
 import com.udi.geprac.legalizacion.service.RevisionService;
+import com.udi.geprac.legalizacion.service.SemestreService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -49,6 +51,12 @@ class SeguridadTest {
 
     @MockitoBean
     private HistorialService historial;
+
+    @MockitoBean
+    private PracticaService practicas;
+
+    @MockitoBean
+    private SemestreService semestres;
 
     @Test
     void sinTokenRespondeNoAutorizado() throws Exception {

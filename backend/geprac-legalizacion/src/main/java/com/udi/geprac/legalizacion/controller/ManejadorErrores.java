@@ -1,5 +1,7 @@
 package com.udi.geprac.legalizacion.controller;
 
+import com.udi.geprac.legalizacion.service.CampoInvalidoException;
+import com.udi.geprac.legalizacion.service.IdentidadNoDisponibleException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -22,8 +24,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  *
  * Los errores propios de Spring MVC —ruta o método que no existen, cuerpo que
  * no se puede leer— los resuelve la clase base con el mismo formato. Los datos
- * que no pasan la validación responden 400 con el mensaje de cada campo en la
- * propiedad «campos», para que el cliente los señale junto al campo.
+ * que no pasan la validación, y las reglas que fallan en un campo concreto,
+ * llevan el mensaje de cada campo en la propiedad «campos», para que el
+ * cliente los señale junto al campo, igual que en MS-01.
  *
  * @author Darien Asdrwal Pesca Ojeda
  */
@@ -41,6 +44,20 @@ public class ManejadorErrores extends ResponseEntityExceptionHandler {
             "Revise los datos señalados: el software no guardó nada.");
         problema.setProperty("campos", campos);
         return ResponseEntity.badRequest().body(problema);
+    }
+
+    /** Una regla del caso de uso que falla en un campo: su estado, con el mensaje en ese campo. */
+    @ExceptionHandler(CampoInvalidoException.class)
+    public ProblemDetail campoInvalido(CampoInvalidoException e) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(e.getEstado(), e.getMessage());
+        problema.setProperty("campos", Map.of(e.getCampo(), e.getMessage()));
+        return problema;
+    }
+
+    /** MS-01 no respondió: 503, para que el cliente ofrezca intentar de nuevo. */
+    @ExceptionHandler(IdentidadNoDisponibleException.class)
+    public ProblemDetail identidadNoDisponible(IdentidadNoDisponibleException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
     }
 
     /** Un dato que no existe: 404. */

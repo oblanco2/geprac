@@ -33,6 +33,9 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
     List<Inscripcion> findBySemestreAndPracticaInAndEstadoNot(Semestre semestre, Collection<Practica> practicas,
                                                               EstadoInscripcion estado);
 
+    /** Cuántas inscripciones tiene una práctica, en cualquier semestre (CU-02, variación 2.2.4). */
+    long countByPractica(Practica practica);
+
     /** Las inscripciones de un programa en un estado: la bandeja de aval de la Dirección (CU-07, paso 2). */
     List<Inscripcion> findByEstadoAndPracticaCodigoPrograma(EstadoInscripcion estado, String codigoPrograma);
 
