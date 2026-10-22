@@ -2,7 +2,8 @@
  * P-17 · Bandeja de aval (CU-07, RF-12). Las inscripciones del programa que el
  * tutor académico ya aprobó, con el nombre de quien las aprobó y el número de
  * pendientes por avalar, y después las ya avaladas del semestre, para
- * consultarlas (variación 2.1). Ninguna llega aquí sin la revisión del tutor.
+ * consultarlas (variación 2.1), con sus filtros por práctica, institución y
+ * estado. Ninguna llega aquí sin la revisión del tutor.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -10,16 +11,18 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { listarAprobadas } from '../../api/legalizacion'
 import { aprobacion, consultarNombres } from '../../lib/tutores'
+import { opcionesEstado } from '../../lib/formato'
 import Marco from '../../componentes/Marco'
-import { Aviso, Cargando, Estado, Seleccion, Tabla } from '../../componentes/controles'
+import { Aviso, Cargando, Estado, NotaFiltros, Seleccion, Tabla } from '../../componentes/controles'
 
 const COLUMNAS = [{ l: 'Estudiante' }, { l: 'Práctica' }, { l: 'Institución' }, { l: 'Aprobada por', w: 'l' }, { l: 'Estado', w: 'm' }, { l: '', w: 's' }]
+const ESTADOS_AVAL = opcionesEstado(['aprobada', 'avalada'])
 const nombre = (i) => `${i.datos.nombres} ${i.datos.apellidos}`
 const practica = (i) => `${i.ordenPractica} · ${i.datos.nombrePractica}`
 
 export default function BandejaAval() {
   const [estado, setEstado] = useState({ lista: false, inscripciones: [], nombres: {}, error: null })
-  const [filtro, setFiltro] = useState({ practica: '', institucion: '' })
+  const [filtro, setFiltro] = useState({ practica: '', institucion: '', estado: '' })
 
   useEffect(() => {
     let vigente = true
@@ -40,17 +43,23 @@ export default function BandejaAval() {
   const practicas = [...new Map(todas.map((i) => [String(i.practicaId), practica(i)])).entries()]
   const instituciones = [...new Set(todas.map((i) => i.datos.institucionRazonSocial).filter(Boolean))].sort().map((n) => [n, n])
   const visibles = todas.filter((i) => (!filtro.practica || String(i.practicaId) === filtro.practica)
-    && (!filtro.institucion || i.datos.institucionRazonSocial === filtro.institucion))
+    && (!filtro.institucion || i.datos.institucionRazonSocial === filtro.institucion)
+    && (!filtro.estado || i.estado === filtro.estado))
   const n = todas.filter((i) => i.estado === 'APROBADA').length
   const tutor = (i) => estado.nombres[aprobacion(i)?.revisorId] || 'Tutor académico'
 
   return marco(
     <>
+      <NotaFiltros>
+        Puede filtrar por <b>práctica</b>, <b>institución</b> y <b>estado</b>: aprobadas, que esperan su aval, o avaladas en el semestre.
+      </NotaFiltros>
       <div className="filtros">
         <Seleccion etiqueta="Práctica" opciones={practicas} vacia="Todas" value={filtro.practica}
           onChange={(e) => setFiltro((f) => ({ ...f, practica: e.target.value }))} />
         <Seleccion etiqueta="Institución" opciones={instituciones} vacia="Todas" value={filtro.institucion}
           onChange={(e) => setFiltro((f) => ({ ...f, institucion: e.target.value }))} />
+        <Seleccion etiqueta="Estado" opciones={ESTADOS_AVAL} vacia="Todos" value={filtro.estado}
+          onChange={(e) => setFiltro((f) => ({ ...f, estado: e.target.value }))} />
         <span className="empuja"><span className="pill">{n} por avalar</span></span>
       </div>
       <Tabla titulo="Inscripciones aprobadas por el tutor académico" columnas={COLUMNAS}

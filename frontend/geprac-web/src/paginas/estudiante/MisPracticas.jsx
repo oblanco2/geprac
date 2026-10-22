@@ -97,6 +97,7 @@ export default function MisPracticas() {
         })}
       </ul>
       <ul className="leyenda-estados" aria-label="Significado de los estados">
+        <li><Estado estado="sin" texto="No inscrita" /> la práctica aún no tiene inscripción</li>
         {Object.keys(ESTADOS).map((k) => <li key={k}><Estado estado={k} /> {ESTADOS[k].sentido}</li>)}
       </ul>
     </>,

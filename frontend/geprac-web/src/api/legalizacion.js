@@ -15,7 +15,8 @@ export const crearInstitucion = (institucion) => api.post('/instituciones', inst
 export const actualizarInstitucion = (id, institucion) => api.put(`/instituciones/${id}`, institucion).then(datos)
 export const eliminarInstitucion = (id) => api.delete(`/instituciones/${id}`)
 
-export const listarPendientes = () => api.get('/revisiones/pendientes').then(datos)
+/** La bandeja del tutor con todos sus estados, menos los borradores, para filtrarla por estado. */
+export const listarBandeja = () => api.get('/revisiones').then(datos)
 export const registrarRevision = (id, resultado, motivo) =>
   api.post(`/revisiones/${id}`, { resultado, motivo }).then(datos)
 
