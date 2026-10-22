@@ -49,6 +49,16 @@ public class Usuario {
         this.creadoEn = LocalDateTime.now();
     }
 
+    /**
+     * CU-04, variación 2.1: el rol con el que opera el software. El programa
+     * solo lo lleva el director, que opera sobre él; con cualquier otro rol
+     * queda vacío.
+     */
+    public void asignarRol(Rol rol, Programa programa) {
+        this.rol = rol;
+        this.programa = rol == Rol.DIRECTOR ? programa : null;
+    }
+
     public UUID getId()                     { return id; }
     public String getNombrePresentacion()   { return nombrePresentacion; }
     public String getCorreoInstitucional()  { return correoInstitucional; }
