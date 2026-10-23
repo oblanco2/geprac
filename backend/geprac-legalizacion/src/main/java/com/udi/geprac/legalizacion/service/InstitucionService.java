@@ -29,10 +29,17 @@ public class InstitucionService {
         this.instituciones = instituciones;
     }
 
-    /** Paso 2: el catálogo, por razón social. */
+    /**
+     * Paso 2: el catálogo, por razón social. Al estudiante solo le llegan las
+     * activas, que son las que puede escoger al inscribir su práctica (CU-05,
+     * paso 5).
+     */
     @Transactional(readOnly = true)
     public List<InstitucionDto> listarInstituciones() {
-        return instituciones.findAllByOrderByRazonSocial().stream().map(InstitucionDto::de).toList();
+        boolean estudiante = "ESTUDIANTE".equals(UsuarioActual.rol());
+        return instituciones.findAllByOrderByRazonSocial().stream()
+            .filter(i -> !estudiante || i.getActiva())
+            .map(InstitucionDto::de).toList();
     }
 
     /** Pasos 7 a 10: comprueba que no exista ya en esa ciudad y la guarda con sus contactos. */

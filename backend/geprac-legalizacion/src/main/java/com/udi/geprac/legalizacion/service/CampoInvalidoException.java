@@ -1,5 +1,8 @@
 package com.udi.geprac.legalizacion.service;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -7,13 +10,15 @@ import org.springframework.http.HttpStatus;
  * formulario: la posición del plan que ya ocupa otra práctica, el código de un
  * semestre que ya existe, el usuario que no tiene el rol de tutor. El cliente
  * web la recibe con el nombre del campo, para señalarlo junto a él, como señala
- * los que no pasan la validación. Es la misma que usa MS-01.
+ * los que no pasan la validación. Es la misma que usa MS-01; aquí admite
+ * además varios campos a la vez, como el segundo paso de la inscripción, que
+ * señala juntos el contacto y las fechas que faltan (CU-05, excepción 9.1).
  *
  * @author Darien Asdrwal Pesca Ojeda
  */
 public class CampoInvalidoException extends RuntimeException {
 
-    private final String campo;
+    private final Map<String, String> campos;
     private final HttpStatus estado;
 
     /** La regla no se cumple: 400. */
@@ -23,11 +28,22 @@ public class CampoInvalidoException extends RuntimeException {
 
     /** Con el estado que corresponde; por ejemplo, 409 cuando el dato ya está registrado. */
     public CampoInvalidoException(String campo, String mensaje, HttpStatus estado) {
+        this(Map.of(campo, mensaje), mensaje, estado);
+    }
+
+    /** Varias reglas que no se cumplen, cada una con su mensaje en su campo: 400, con un mensaje general. */
+    public CampoInvalidoException(Map<String, String> campos, String mensaje) {
+        this(campos, mensaje, HttpStatus.BAD_REQUEST);
+    }
+
+    private CampoInvalidoException(Map<String, String> campos, String mensaje, HttpStatus estado) {
         super(mensaje);
-        this.campo = campo;
+        this.campos = Collections.unmodifiableMap(new LinkedHashMap<>(campos));
         this.estado = estado;
     }
 
-    public String getCampo()      { return campo; }
-    public HttpStatus getEstado() { return estado; }
+    /** El primer campo señalado. */
+    public String getCampo()                { return campos.keySet().iterator().next(); }
+    public Map<String, String> getCampos()  { return campos; }
+    public HttpStatus getEstado()           { return estado; }
 }

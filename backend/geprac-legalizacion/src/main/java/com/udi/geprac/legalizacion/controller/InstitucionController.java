@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 /**
  * CU-03 · Gestionar instituciones receptoras. Solo el director mantiene el
  * catálogo, del que el estudiante escoge la institución al inscribir su
- * práctica (CU-05).
+ * práctica (CU-05): por eso el estudiante también lo consulta, con solo las
+ * instituciones activas.
  *
  * @author Darien Asdrwal Pesca Ojeda
  */
@@ -24,7 +25,7 @@ public class InstitucionController {
         this.servicio = servicio;
     }
 
-    /** GET /api/instituciones: el catálogo con sus contactos (P-14). */
+    /** GET /api/instituciones: el catálogo con sus contactos (P-14); al estudiante, las activas (P-05 y P-06). */
     @GetMapping
     public List<InstitucionDto> listarInstituciones() {
         return servicio.listarInstituciones();

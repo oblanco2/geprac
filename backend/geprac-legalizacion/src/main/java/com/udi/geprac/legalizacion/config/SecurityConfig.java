@@ -31,11 +31,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                // CU-02 y CU-03: el director mantiene los catálogos; CU-04: prepara el semestre;
-                // CU-06: el tutor revisa
+                // CU-02 y CU-03: el director mantiene los catálogos, y el estudiante consulta el de
+                // instituciones para escoger la suya (CU-05); CU-04: el director prepara el semestre;
+                // CU-05: el estudiante inscribe su práctica; CU-06: el tutor revisa
                 .requestMatchers("/practicas/**").hasRole("DIRECTOR")
                 .requestMatchers("/semestres/**").hasRole("DIRECTOR")
+                .requestMatchers(HttpMethod.GET, "/instituciones").hasAnyRole("DIRECTOR", "ESTUDIANTE")
                 .requestMatchers("/instituciones/**").hasRole("DIRECTOR")
+                .requestMatchers("/inscripciones/**").hasRole("ESTUDIANTE")
                 .requestMatchers("/revisiones/**").hasRole("TUTOR")
                 // CU-07: el director avala; CU-08: el estudiante emite sus formatos;
                 // CU-09: los tres roles consultan el historial, cada uno con su alcance

@@ -8,9 +8,11 @@ import java.util.UUID;
 
 /**
  * Una inscripción con su estado y la copia completa del expediente: es lo que
- * presentan la revisión del tutor (P-10 y P-11) y el aval de la Dirección
- * (P-17 y P-18). Trae sus revisiones y su aval, con quién los hizo y cuándo,
- * y si está devuelta, el motivo.
+ * presentan los tres pasos de la inscripción y su estado (P-05 a P-08), la
+ * revisión del tutor (P-10 y P-11) y el aval de la Dirección (P-17 y P-18).
+ * Trae sus revisiones y su aval, con quién los hizo y cuándo, y si está
+ * devuelta, el motivo. La institución y el contacto escogidos, y las fechas
+ * del semestre, le sirven al estudiante para retomar los pasos 1 y 2.
  *
  * @author Darien Asdrwal Pesca Ojeda
  */
@@ -19,7 +21,8 @@ public record InscripcionDto(
     LocalDate fechaInicio, LocalDate fechaFin, LocalDateTime creadaEn, LocalDateTime enviadaEn,
     String motivoDevolucion, DatosDto datos, List<String> objetivos, List<String> actividades,
     List<Formacion> formaciones, List<Experiencia> experiencias, List<Referencia> referencias,
-    List<RevisionResumen> revisiones, AvalResumen aval
+    List<RevisionResumen> revisiones, AvalResumen aval,
+    Long institucionId, Long contactoId, LocalDate semestreInicio, LocalDate semestreCierre
 ) {
     /** Una entrada de formación académica copiada de la hoja de vida. */
     public record Formacion(String tipo, String institucion, String nombre, Integer anio) { }
@@ -52,6 +55,9 @@ public record InscripcionDto(
                 r.getTelefono(), r.getCiudad())).toList(),
             i.getRevisiones().stream().map(r -> new RevisionResumen(r.getRevisorId(), r.getResultado().name(),
                 r.getMotivo(), r.getFecha())).toList(),
-            i.getAval() == null ? null : new AvalResumen(i.getAval().getDirectorId(), i.getAval().getFecha()));
+            i.getAval() == null ? null : new AvalResumen(i.getAval().getDirectorId(), i.getAval().getFecha()),
+            i.getInstitucion() == null ? null : i.getInstitucion().getId(),
+            i.getContacto() == null ? null : i.getContacto().getId(),
+            i.getSemestre().getFechaInicio(), i.getSemestre().getFechaCierre());
     }
 }
