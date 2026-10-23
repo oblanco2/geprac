@@ -34,7 +34,9 @@ export default function MisPracticas() {
   if (!estado.lista) return marco(<Cargando />)
   if (estado.error) return marco(<Aviso tipo="err" negrita="No fue posible consultar sus prácticas.">{estado.error}</Aviso>)
   // excepción 4.2: sin programa ni registro de estudiante no hay plan que presentar
-  if (estado.sinPerfil) return marco(<Aviso tipo="info" negrita={estado.sinPerfil} />)
+  if (estado.sinPerfil) {
+    return marco(<Aviso tipo="info" negrita={estado.sinPerfil}><Link className="acc" to="/mi-perfil">Ir a Mi perfil</Link></Aviso>)
+  }
 
   // de cada práctica, la inscripción más reciente; el servicio las entrega en el orden del plan
   const porPractica = new Map()
@@ -53,7 +55,7 @@ export default function MisPracticas() {
     <>
       {devuelta && (
         <Aviso tipo="err" negrita={`Su inscripción de la práctica ${devuelta.ordenPractica} fue devuelta por el tutor académico.`}>
-          Motivo: {devuelta.motivoDevolucion}
+          Motivo: {devuelta.motivoDevolucion} <Link className="acc" to="/mi-inscripcion">Ver el estado y corregirla</Link>
         </Aviso>
       )}
       <h3 className="sec">Plan de prácticas{programa ? ` · ${programa}` : ''} · {avaladas} de {tarjetas.length} avaladas</h3>

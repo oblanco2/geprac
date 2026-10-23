@@ -1,8 +1,8 @@
 /**
  * Operaciones de MS-02 Legalización de Prácticas que usa el cliente web: las
- * instituciones receptoras (CU-03), la revisión (CU-06), el aval (CU-07), los
- * formatos (CU-08) y el historial (CU-09). Cada función lleva el nombre de su
- * operación en el diseño.
+ * instituciones receptoras (CU-03), la inscripción (CU-05), la revisión
+ * (CU-06), el aval (CU-07), los formatos (CU-08) y el historial (CU-09). Cada
+ * función lleva el nombre de su operación en el diseño.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -14,6 +14,16 @@ export const listarInstituciones = () => api.get('/instituciones').then(datos)
 export const crearInstitucion = (institucion) => api.post('/instituciones', institucion).then(datos)
 export const actualizarInstitucion = (id, institucion) => api.put(`/instituciones/${id}`, institucion).then(datos)
 export const eliminarInstitucion = (id) => api.delete(`/instituciones/${id}`)
+
+/**
+ * La inscripción del semestre abierto: la crea en borrador con la copia del
+ * expediente, o devuelve la que el estudiante ya había iniciado.
+ */
+export const iniciarInscripcion = () => api.post('/inscripciones').then(datos)
+/** Lo diligenciado en un paso: lo que no viene, queda como estaba. */
+export const actualizarInscripcion = (id, cambios) => api.put(`/inscripciones/${id}`, cambios).then(datos)
+export const enviarARevision = (id) => api.post(`/inscripciones/${id}/envio`).then(datos)
+export const consultarEstado = () => api.get('/inscripciones/actual').then(datos)
 
 /** La bandeja del tutor con todos sus estados, menos los borradores, para filtrarla por estado. */
 export const listarBandeja = () => api.get('/revisiones').then(datos)
