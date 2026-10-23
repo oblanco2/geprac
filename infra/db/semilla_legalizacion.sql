@@ -1,17 +1,21 @@
 -- ══════════════════════════════════════════════════════════════════
--- GEPRAC · Datos de la demostración del prototipo funcional · MS-02
+-- GEPRAC · Datos de la demostración final · MS-02
 --
--- Prepara en el esquema legalizacion lo que los cinco casos de uso del
--- punto 12 (CU-03, CU-06, CU-07, CU-08 y CU-09) necesitan y no crean:
---   1. Los semestres 2025-2 y 2026-1, cerrados, y el 2026-2, abierto, y la
---      designación del tutor en las prácticas de cada uno (CU-04).
+-- Prepara en el esquema legalizacion el punto de partida de la
+-- demostración de los nueve casos de uso:
+--   1. Los semestres 2025-2 y 2026-1, cerrados, y el 2026-2, abierto, con
+--      el tutor designado en las prácticas de cada uno. La práctica 8 del
+--      2026-2 queda sin tutor: se lo designan en la demostración (CU-04).
 --   2. El catálogo de las ocho prácticas de LEI, con sus objetivos y sus
 --      actividades (CU-02), y las instituciones receptoras con sus
---      contactos, que la Dirección sigue manteniendo en CU-03.
---   3. Catorce inscripciones en los cinco estados (CU-05), con la copia
---      completa de su expediente, sus revisiones y sus avales: tres del
---      estudiante de la demostración y once de estudiantes ficticios, que
---      no tienen cuenta y solo aparecen en las bandejas y en el historial.
+--      contactos (CU-03).
+--   3. Trece inscripciones en los cinco estados (CU-05), con la copia
+--      completa de su expediente, sus revisiones y sus avales: las de las
+--      prácticas 1 y 2 del estudiante de la demostración, avaladas, y once
+--      de estudiantes ficticios, que no tienen cuenta y solo aparecen en
+--      las bandejas y en el historial. La de su práctica 3 no está: la crea
+--      él en la demostración y la lleva por la revisión, el aval y los
+--      formatos.
 -- Las plantillas de los cuatro formatos no van aquí: las pone en vigencia
 -- la migración V2 de MS-02.
 --
@@ -23,8 +27,13 @@
 -- Dónde se ejecuta: SQL Editor del proyecto de Supabase de MS-02. Se pega
 -- completo y se da Run. Se puede ejecutar las veces que haga falta: no
 -- repite nada de lo que ya existe. Para repetir la demostración desde el
--- principio, se pone en true la línea volver_a_empezar: borra antes las
--- inscripciones de la demostración, con sus revisiones, avales y formatos.
+-- principio, se pone en true la línea volver_a_empezar: borra las
+-- inscripciones de la demostración, con sus revisiones, avales y
+-- formatos, y la institución que la Dirección registra en ella; devuelve
+-- el catálogo y los tutores del 2026-2 a como están en este archivo, y
+-- deja abierto el 2026-2, sin los semestres que se hayan abierto después.
+-- La primera vez en la entrega final se ejecuta así, para quitar lo que
+-- quedó de la demostración del segundo avance.
 --
 -- Resultado: una fila por inscripción de la demostración, con su estado.
 --
@@ -36,15 +45,22 @@
 CREATE OR REPLACE FUNCTION pg_temp.semestre(p_codigo text) RETURNS bigint LANGUAGE sql AS
 $f$ SELECT id FROM legalizacion.semestre WHERE codigo = p_codigo $f$;
 
-CREATE OR REPLACE FUNCTION pg_temp.practica(p_orden int, p_nombre text, p_horario text, p_objetivo text, p_objetivos text[], p_actividades text[])
+-- Una práctica del catálogo; si ya estaba, se respeta como está, salvo que se restablezca
+CREATE OR REPLACE FUNCTION pg_temp.practica(p_orden int, p_nombre text, p_horario text, p_objetivo text, p_objetivos text[], p_actividades text[],
+                                 p_restablecer boolean)
 RETURNS void LANGUAGE plpgsql AS $f$
 DECLARE v bigint;
 BEGIN
     INSERT INTO legalizacion.practica (codigo_programa, orden, nombre, objetivo_general, horario_estandar, activa)
     VALUES ('LEI', p_orden, p_nombre, p_objetivo, p_horario, true)
-    ON CONFLICT (codigo_programa, orden) DO NOTHING
+    ON CONFLICT (codigo_programa, orden) DO UPDATE
+       SET nombre = EXCLUDED.nombre, objetivo_general = EXCLUDED.objetivo_general,
+           horario_estandar = EXCLUDED.horario_estandar, activa = true
+     WHERE p_restablecer
     RETURNING id INTO v;
-    IF v IS NULL THEN RETURN; END IF;   -- ya estaba en el catálogo: se respeta como está
+    IF v IS NULL THEN RETURN; END IF;   -- ya estaba en el catálogo y no se restablece
+    DELETE FROM legalizacion.objetivo_practica WHERE practica_id = v;
+    DELETE FROM legalizacion.actividad_practica WHERE practica_id = v;
     INSERT INTO legalizacion.objetivo_practica (practica_id, posicion, texto)
     SELECT v, k, p_objetivos[k] FROM generate_subscripts(p_objetivos, 1) AS k;
     INSERT INTO legalizacion.actividad_practica (practica_id, posicion, texto)
@@ -126,7 +142,7 @@ DECLARE
     director constant uuid := '00000000-0000-0000-0000-000000000000';
     tutor constant uuid := '00000000-0000-0000-0000-000000000000';
     estudiante constant bigint := 0;
-    -- ▼ true para borrar las inscripciones de la demostración y empezarla de nuevo
+    -- ▼ true para empezar la demostración de nuevo: la primera vez en la entrega final va en true
     volver_a_empezar constant boolean := false;
 BEGIN
     IF director = '00000000-0000-0000-0000-000000000000' OR tutor = '00000000-0000-0000-0000-000000000000' OR estudiante = 0 THEN
@@ -147,6 +163,29 @@ BEGIN
         DELETE FROM legalizacion.inscripcion_referencia WHERE inscripcion_id IN (SELECT id FROM demo);
         DELETE FROM legalizacion.inscripcion_datos WHERE inscripcion_id IN (SELECT id FROM demo);
         DELETE FROM legalizacion.inscripcion WHERE id IN (SELECT id FROM demo);
+
+        -- la institución que la Dirección registra en la demostración (CU-03), si ya no tiene inscripciones
+        DELETE FROM legalizacion.contacto_institucion c
+         USING legalizacion.institucion n
+         WHERE c.institucion_id = n.id AND n.razon_social = 'Jardín Infantil Pasitos de Colores'
+           AND NOT EXISTS (SELECT 1 FROM legalizacion.inscripcion i WHERE i.institucion_id = n.id);
+        DELETE FROM legalizacion.institucion n
+         WHERE n.razon_social = 'Jardín Infantil Pasitos de Colores'
+           AND NOT EXISTS (SELECT 1 FROM legalizacion.inscripcion i WHERE i.institucion_id = n.id);
+
+        -- los semestres que se hayan abierto después (CU-04), si no tienen inscripciones, y el 2026-2 abierto otra vez
+        DELETE FROM legalizacion.tutor_practica t
+         USING legalizacion.semestre s
+         WHERE t.semestre_id = s.id AND s.codigo NOT IN ('2025-2', '2026-1', '2026-2')
+           AND NOT EXISTS (SELECT 1 FROM legalizacion.inscripcion i WHERE i.semestre_id = s.id);
+        DELETE FROM legalizacion.semestre s
+         WHERE s.codigo NOT IN ('2025-2', '2026-1', '2026-2')
+           AND NOT EXISTS (SELECT 1 FROM legalizacion.inscripcion i WHERE i.semestre_id = s.id);
+        UPDATE legalizacion.semestre SET abierto = false WHERE abierto AND codigo <> '2026-2';
+        UPDATE legalizacion.semestre SET abierto = true WHERE codigo = '2026-2';
+
+        -- los tutores del 2026-2: el punto 3 los vuelve a designar como al principio
+        DELETE FROM legalizacion.tutor_practica WHERE semestre_id = pg_temp.semestre('2026-2');
     END IF;
 
     -- 1. Semestres: solo uno abierto, el 2026-2
@@ -158,39 +197,39 @@ BEGIN
      WHERE NOT EXISTS (SELECT 1 FROM legalizacion.semestre s WHERE s.codigo = v.codigo)
        AND NOT (v.abierto AND EXISTS (SELECT 1 FROM legalizacion.semestre s WHERE s.abierto));
 
-    -- 2. Las ocho prácticas de LEI y las instituciones receptoras
+    -- 2. Las ocho prácticas de LEI, que volver_a_empezar restablece, y las instituciones receptoras
     PERFORM pg_temp.practica(1, 'Observación del ambiente pedagógico', 'Lunes y miércoles de 7:00 a 11:00',
         'Reconocer el ambiente pedagógico de una institución de educación inicial a partir de la observación de sus espacios, rutinas y materiales.',
         ARRAY['Describir la organización de los espacios físicos y su relación con las actividades de los niños.', 'Identificar las rutinas diarias y los momentos de la jornada.', 'Registrar los materiales didácticos disponibles y su uso.', 'Relacionar lo observado con los referentes técnicos de la educación inicial.'],
-        ARRAY['Observar la jornada completa en el aula asignada.', 'Diligenciar el diario de campo de cada sesión.', 'Elaborar el informe de caracterización del ambiente pedagógico.']);
+        ARRAY['Observar la jornada completa en el aula asignada.', 'Diligenciar el diario de campo de cada sesión.', 'Elaborar el informe de caracterización del ambiente pedagógico.'], volver_a_empezar);
     PERFORM pg_temp.practica(2, 'Observación del maestro en el aula', 'Martes y jueves de 7:00 a 11:00',
         'Analizar la práctica del maestro de educación inicial en el aula: sus estrategias de enseñanza y su interacción con los niños.',
         ARRAY['Identificar las estrategias didácticas que emplea el maestro.', 'Describir la comunicación y el manejo del grupo.', 'Reconocer cómo planea y evalúa las actividades.', 'Contrastar lo observado con los fundamentos pedagógicos del programa.'],
-        ARRAY['Observar al maestro titular durante las sesiones programadas.', 'Entrevistar al maestro sobre su planeación.', 'Registrar las observaciones en el diario de campo.', 'Presentar el informe de análisis de la práctica docente.']);
+        ARRAY['Observar al maestro titular durante las sesiones programadas.', 'Entrevistar al maestro sobre su planeación.', 'Registrar las observaciones en el diario de campo.', 'Presentar el informe de análisis de la práctica docente.'], volver_a_empezar);
     PERFORM pg_temp.practica(3, 'Investigación en gerencia educativa', 'Martes y jueves de 7:00 a 12:00',
         'Analizar los procesos de administración y gestión educativa de una institución de educación inicial, identificando las funciones de sus instancias directivas y sus instrumentos de registro.',
         ARRAY['Identificar la estructura administrativa de la institución y las funciones de cada instancia.', 'Describir el proceso de matrícula y los libros reglamentarios que la institución mantiene.', 'Contrastar lo observado con los lineamientos del Ministerio de Educación Nacional.'],
-        ARRAY['Entrevistar al rector y al coordinador sobre sus funciones.', 'Revisar los instrumentos de registro académico de la institución.', 'Elaborar el informe de la práctica con las conclusiones del ejercicio.']);
+        ARRAY['Entrevistar al rector y al coordinador sobre sus funciones.', 'Revisar los instrumentos de registro académico de la institución.', 'Elaborar el informe de la práctica con las conclusiones del ejercicio.'], volver_a_empezar);
     PERFORM pg_temp.practica(4, 'Práctica en espacios no convencionales', 'Sábados de 8:00 a 12:00',
         'Diseñar y desarrollar experiencias pedagógicas para la primera infancia en escenarios distintos al aula escolar.',
         ARRAY['Caracterizar el escenario no convencional y la población que atiende.', 'Diseñar experiencias pedagógicas acordes con el escenario.', 'Evaluar la participación de los niños en las experiencias desarrolladas.'],
-        ARRAY['Visitar el escenario y elaborar su caracterización.', 'Planear las experiencias pedagógicas.', 'Desarrollar las experiencias con el grupo asignado.', 'Elaborar el informe con la evaluación de las experiencias.']);
+        ARRAY['Visitar el escenario y elaborar su caracterización.', 'Planear las experiencias pedagógicas.', 'Desarrollar las experiencias con el grupo asignado.', 'Elaborar el informe con la evaluación de las experiencias.'], volver_a_empezar);
     PERFORM pg_temp.practica(5, 'Primera infancia de 0 a 3 años', 'Lunes a miércoles de 8:00 a 11:00',
         'Acompañar los procesos de desarrollo de niños de 0 a 3 años mediante experiencias de cuidado, juego y exploración.',
         ARRAY['Identificar los hitos del desarrollo de los niños del grupo.', 'Planear experiencias de juego y exploración para la edad.', 'Participar en las rutinas de cuidado con criterio pedagógico.', 'Registrar los avances de los niños en los instrumentos de seguimiento.'],
-        ARRAY['Observar al grupo y elaborar su caracterización.', 'Desarrollar experiencias de juego y exploración.', 'Llevar el registro de seguimiento del desarrollo.']);
+        ARRAY['Observar al grupo y elaborar su caracterización.', 'Desarrollar experiencias de juego y exploración.', 'Llevar el registro de seguimiento del desarrollo.'], volver_a_empezar);
     PERFORM pg_temp.practica(6, 'Niños de 3 a 6 años y anteproyecto', 'Martes y jueves de 7:00 a 12:00',
         'Desarrollar experiencias pedagógicas con niños de 3 a 6 años y formular el anteproyecto de investigación de la práctica.',
         ARRAY['Caracterizar al grupo de niños de 3 a 6 años.', 'Planear y desarrollar experiencias pedagógicas para el grupo.', 'Identificar una situación problema del contexto.', 'Formular el anteproyecto con su pregunta, objetivos y metodología.', 'Socializar el anteproyecto con el tutor académico.'],
-        ARRAY['Elaborar la caracterización del grupo.', 'Desarrollar las experiencias pedagógicas planeadas.', 'Redactar el anteproyecto.', 'Presentar el anteproyecto ante el tutor académico.']);
+        ARRAY['Elaborar la caracterización del grupo.', 'Desarrollar las experiencias pedagógicas planeadas.', 'Redactar el anteproyecto.', 'Presentar el anteproyecto ante el tutor académico.'], volver_a_empezar);
     PERFORM pg_temp.practica(7, 'Implementación en institución educativa I', 'Lunes a jueves de 7:00 a 11:00',
         'Implementar en una institución educativa la propuesta derivada del anteproyecto, con su planeación y su registro.',
         ARRAY['Ajustar la propuesta al contexto de la institución.', 'Planear las sesiones de implementación.', 'Desarrollar las sesiones con el grupo asignado.', 'Registrar la evidencia de cada sesión.'],
-        ARRAY['Concertar con la institución el cronograma de implementación.', 'Elaborar la planeación de las sesiones.', 'Desarrollar las sesiones de implementación.', 'Registrar la evidencia en el diario de campo.', 'Presentar el informe de avance.']);
+        ARRAY['Concertar con la institución el cronograma de implementación.', 'Elaborar la planeación de las sesiones.', 'Desarrollar las sesiones de implementación.', 'Registrar la evidencia en el diario de campo.', 'Presentar el informe de avance.'], volver_a_empezar);
     PERFORM pg_temp.practica(8, 'Implementación en institución educativa II', 'Lunes a jueves de 7:00 a 11:00',
         'Culminar la implementación de la propuesta pedagógica y evaluar sus resultados.',
         ARRAY['Completar las sesiones de implementación.', 'Evaluar los resultados de la propuesta.', 'Sistematizar la experiencia.', 'Socializar los resultados con la institución.'],
-        ARRAY['Desarrollar las sesiones restantes.', 'Aplicar los instrumentos de evaluación.', 'Redactar el informe final.', 'Socializar los resultados con la comunidad educativa.', 'Entregar el informe final al tutor académico.']);
+        ARRAY['Desarrollar las sesiones restantes.', 'Aplicar los instrumentos de evaluación.', 'Redactar el informe final.', 'Socializar los resultados con la comunidad educativa.', 'Entregar el informe final al tutor académico.'], volver_a_empezar);
 
     PERFORM pg_temp.institucion('Institución Educativa Las Américas', '890.205.114-3', 'Carrera 22 # 104-40', 'Bucaramanga', '607 643 2200', 'rectoria@lasamericas.edu.co', 'www.lasamericas.edu.co', 'Álvaro Pineda Suárez', true,
         '[{"nombre": "María Patricia Flores", "cargo": "Coordinadora académica", "telefono": "607 643 2210", "celular": "311 764 0098", "correo": "coordinacion@lasamericas.edu.co"}, {"nombre": "Álvaro Pineda Suárez", "cargo": "Rector", "telefono": "607 643 2200", "celular": "310 228 7741", "correo": "rectoria@lasamericas.edu.co"}]'::jsonb);
@@ -209,7 +248,7 @@ BEGIN
     PERFORM pg_temp.institucion('Hogar Infantil Pequeños Exploradores', '900.315.774-2', 'Carrera 6 # 11-20', 'Piedecuesta', '607 655 3021', 'hipexploradores@gmail.com', NULL, 'Martha Cecilia Rojas', false,
         '[{"nombre": "Martha Cecilia Rojas", "cargo": "Directora", "telefono": "607 655 3021", "celular": "314 902 6617", "correo": "hipexploradores@gmail.com"}]'::jsonb);
 
-    -- 3. El tutor de la demostración, designado en las prácticas de cada semestre; la 8 del 2026-2 queda sin tutor
+    -- 3. El tutor de la demostración, designado en las prácticas de cada semestre; la 8 del 2026-2 queda sin tutor (CU-04)
     INSERT INTO legalizacion.tutor_practica (semestre_id, practica_id, tutor_id)
     SELECT s.id, p.id, tutor
       FROM legalizacion.semestre s
@@ -218,15 +257,13 @@ BEGIN
        AND NOT (s.codigo = '2026-2' AND p.orden = 8)
         ON CONFLICT (semestre_id, practica_id) DO NOTHING;
 
-    -- 4. Las inscripciones, con su copia, sus revisiones y sus avales
+    -- 4. Las inscripciones, con su copia, sus revisiones y sus avales. La de la práctica 3 del estudiante no está:
+    --    la crea él en la demostración (CU-05)
     PERFORM pg_temp.inscribir(estudiante, '{"nombres": "José Fernando", "apellidos": "Rincón Barrios", "tipoDocumento": "C.C.", "numeroDocumento": "1.000.000.001", "lugarExpedicion": "Bucaramanga", "fechaNacimiento": "2003-05-20", "lugarNacimiento": "Bucaramanga", "genero": "Masculino", "estadoCivil": "Soltero(a)", "eps": "Nueva EPS", "direccion": "Calle 9 # 25-40", "barrio": "La Universidad", "ciudad": "Bucaramanga", "telefonoFijo": "607 600 0001", "celular": "300 000 0001", "correoPersonal": "jose.rincon@example.com", "perfilProfesional": "Estudiante de Licenciatura en Educación Infantil interesado en la gestión de instituciones de educación inicial y en el trabajo con familias. Ha acompañado jornadas de lectura para niños de preescolar.", "herramientasTrabajo": "Procesador de texto, hoja de cálculo, presentaciones y plataformas de aula virtual.", "formaciones": [{"tipo": "Secundaria", "institucion": "Institución Educativa Santander", "nombre": "Bachiller académico", "anio": 2022}, {"tipo": "Universitaria", "institucion": "Universidad de Investigación y Desarrollo", "nombre": "Licenciatura en Educación Infantil", "anio": null}], "experiencias": [{"empresa": "Biblioteca Pública Gabriel Turbay", "cargo": "Auxiliar de promoción de lectura", "jefeInmediato": "Lic. Diana Carolina Ortiz", "cargoJefe": "Coordinadora de promoción de lectura", "telefonoEmpresa": "607 634 6500", "fechaInicio": "2024-02-01", "fechaFin": "2024-11-30", "funciones": "Apoyo en la hora del cuento y en los talleres de lectura para niños de 3 a 6 años.", "logros": "Organizó el club de lectura de los sábados."}], "referencias": [{"nombre": "Lic. Gloria Inés Parra", "empresa": "Institución Educativa Santander", "cargo": "Coordinadora académica", "telefono": "312 776 0941", "ciudad": "Bucaramanga"}, {"nombre": "Mg. Liliana Patiño", "empresa": "Universidad de Investigación y Desarrollo", "cargo": "Docente", "telefono": "316 220 9931", "ciudad": "Bucaramanga"}], "nombrePrograma": "Licenciatura en Educación Infantil", "semestreCursado": 1}'::jsonb, 1, '2025-2', 'Jardín Infantil Los Cerezos', 'Marta Rueda',
         '2025-10-06'::date, '2025-11-14'::date, 'AVALADA', '2025-09-10 10:20'::timestamp, '2025-09-15 16:05'::timestamp, '2025-09-18 09:40'::timestamp,
         NULL, tutor, director);
     PERFORM pg_temp.inscribir(estudiante, '{"nombres": "José Fernando", "apellidos": "Rincón Barrios", "tipoDocumento": "C.C.", "numeroDocumento": "1.000.000.001", "lugarExpedicion": "Bucaramanga", "fechaNacimiento": "2003-05-20", "lugarNacimiento": "Bucaramanga", "genero": "Masculino", "estadoCivil": "Soltero(a)", "eps": "Nueva EPS", "direccion": "Calle 9 # 25-40", "barrio": "La Universidad", "ciudad": "Bucaramanga", "telefonoFijo": "607 600 0001", "celular": "300 000 0001", "correoPersonal": "jose.rincon@example.com", "perfilProfesional": "Estudiante de Licenciatura en Educación Infantil interesado en la gestión de instituciones de educación inicial y en el trabajo con familias. Ha acompañado jornadas de lectura para niños de preescolar.", "herramientasTrabajo": "Procesador de texto, hoja de cálculo, presentaciones y plataformas de aula virtual.", "formaciones": [{"tipo": "Secundaria", "institucion": "Institución Educativa Santander", "nombre": "Bachiller académico", "anio": 2022}, {"tipo": "Universitaria", "institucion": "Universidad de Investigación y Desarrollo", "nombre": "Licenciatura en Educación Infantil", "anio": null}], "experiencias": [{"empresa": "Biblioteca Pública Gabriel Turbay", "cargo": "Auxiliar de promoción de lectura", "jefeInmediato": "Lic. Diana Carolina Ortiz", "cargoJefe": "Coordinadora de promoción de lectura", "telefonoEmpresa": "607 634 6500", "fechaInicio": "2024-02-01", "fechaFin": "2024-11-30", "funciones": "Apoyo en la hora del cuento y en los talleres de lectura para niños de 3 a 6 años.", "logros": "Organizó el club de lectura de los sábados."}], "referencias": [{"nombre": "Lic. Gloria Inés Parra", "empresa": "Institución Educativa Santander", "cargo": "Coordinadora académica", "telefono": "312 776 0941", "ciudad": "Bucaramanga"}, {"nombre": "Mg. Liliana Patiño", "empresa": "Universidad de Investigación y Desarrollo", "cargo": "Docente", "telefono": "316 220 9931", "ciudad": "Bucaramanga"}], "nombrePrograma": "Licenciatura en Educación Infantil", "semestreCursado": 2}'::jsonb, 2, '2026-1', 'Institución Educativa Dámaso Zapata', 'Rubén Darío Quintero',
         '2026-04-06'::date, '2026-05-15'::date, 'AVALADA', '2026-03-10 11:15'::timestamp, '2026-03-13 15:30'::timestamp, '2026-03-17 10:10'::timestamp,
-        NULL, tutor, director);
-    PERFORM pg_temp.inscribir(estudiante, '{"nombres": "José Fernando", "apellidos": "Rincón Barrios", "tipoDocumento": "C.C.", "numeroDocumento": "1.000.000.001", "lugarExpedicion": "Bucaramanga", "fechaNacimiento": "2003-05-20", "lugarNacimiento": "Bucaramanga", "genero": "Masculino", "estadoCivil": "Soltero(a)", "eps": "Nueva EPS", "direccion": "Calle 9 # 25-40", "barrio": "La Universidad", "ciudad": "Bucaramanga", "telefonoFijo": "607 600 0001", "celular": "300 000 0001", "correoPersonal": "jose.rincon@example.com", "perfilProfesional": "Estudiante de Licenciatura en Educación Infantil interesado en la gestión de instituciones de educación inicial y en el trabajo con familias. Ha acompañado jornadas de lectura para niños de preescolar.", "herramientasTrabajo": "Procesador de texto, hoja de cálculo, presentaciones y plataformas de aula virtual.", "formaciones": [{"tipo": "Secundaria", "institucion": "Institución Educativa Santander", "nombre": "Bachiller académico", "anio": 2022}, {"tipo": "Universitaria", "institucion": "Universidad de Investigación y Desarrollo", "nombre": "Licenciatura en Educación Infantil", "anio": null}], "experiencias": [{"empresa": "Biblioteca Pública Gabriel Turbay", "cargo": "Auxiliar de promoción de lectura", "jefeInmediato": "Lic. Diana Carolina Ortiz", "cargoJefe": "Coordinadora de promoción de lectura", "telefonoEmpresa": "607 634 6500", "fechaInicio": "2024-02-01", "fechaFin": "2024-11-30", "funciones": "Apoyo en la hora del cuento y en los talleres de lectura para niños de 3 a 6 años.", "logros": "Organizó el club de lectura de los sábados."}], "referencias": [{"nombre": "Lic. Gloria Inés Parra", "empresa": "Institución Educativa Santander", "cargo": "Coordinadora académica", "telefono": "312 776 0941", "ciudad": "Bucaramanga"}, {"nombre": "Mg. Liliana Patiño", "empresa": "Universidad de Investigación y Desarrollo", "cargo": "Docente", "telefono": "316 220 9931", "ciudad": "Bucaramanga"}], "nombrePrograma": "Licenciatura en Educación Infantil", "semestreCursado": 3}'::jsonb, 3, '2026-2', 'Institución Educativa Las Américas', 'María Patricia Flores',
-        '2026-10-05'::date, '2026-11-13'::date, 'ENVIADA', '2026-09-25 18:45'::timestamp, NULL::timestamp, NULL::timestamp,
         NULL, tutor, director);
     PERFORM pg_temp.inscribir(9001, '{"nombres": "Laura Valentina", "apellidos": "Gómez Ardila", "tipoDocumento": "C.C.", "numeroDocumento": "1.098.765.432", "celular": "300 412 7765", "ciudad": "Bucaramanga", "formaciones": [], "experiencias": [], "referencias": [], "nombrePrograma": "Licenciatura en Educación Infantil", "semestreCursado": 3}'::jsonb, 3, '2026-2', 'Institución Educativa Las Américas', 'María Patricia Flores',
         '2026-09-21'::date, '2026-10-30'::date, 'DEVUELTA', '2026-09-16 09:00'::timestamp, '2026-09-18 14:20'::timestamp, NULL::timestamp,
