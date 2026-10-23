@@ -2,7 +2,7 @@
 
 **Software para la Gestión de Prácticas Académicas**
 
-Universidad de Investigación y Desarrollo · Ingeniería de Sistemas · Proyecto Integrador de quinto semestre · Periodo II-2026
+Universidad de Investigación y Desarrollo · Ingeniería de Sistemas · Proyecto Integrador de quinto semestre · Periodo II-2026 · Versión 1.0.0
 
 En los programas de licenciatura de la UDI, cada estudiante realiza una práctica pedagógica por semestre, de primero a octavo, y para cada una diligencia los mismos cuatro formatos institucionales. GEPRAC elimina esa repetición: el estudiante se registra una sola vez, selecciona la práctica que va a cursar y el software genera sus formatos ya diligenciados, con los datos de su registro y el contenido de esa práctica tomado del catálogo. El historial de las ocho prácticas queda disponible en cualquier momento.
 
@@ -80,14 +80,15 @@ Requisitos: JDK 21, Node.js 20.19 o 22.12 en adelante, y Git. Maven no hace falt
 
 ### MS-02 · `backend/geprac-legalizacion`
 
-1. Crear el archivo `src/main/resources/application-local.yml` con la conexión a la base de MS-02. A diferencia de MS-01, aquí van los tres datos, porque MS-02 no trae ninguno en `application.yml`. Git también ignora este archivo:
+1. Crear el archivo `src/main/resources/application-local.yml` con la contraseña de la base de MS-02, como en MS-01; Git también lo ignora. MS-02 le pide a MS-01 el expediente del estudiante y el rol del tutor: sin la dirección local se los pide al MS-01 de Render, y con ella, al que corre en el mismo equipo:
 
    ```yaml
    spring:
      datasource:
-       url: jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:5432/postgres
-       username: postgres.zuwyslwrrbzuwvsfcdna
        password: escriba-aqui-la-contraseña
+   geprac:
+     identidad:
+       url: http://localhost:8080/api
    ```
 
 2. Arrancar el servicio con el perfil `local`, igual que MS-01: *Run Project* en NetBeans, o por consola desde `backend/geprac-legalizacion`.
@@ -122,10 +123,13 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 |---|---|---|
 | Render · MS-01 | `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de MS-01 |
 | Render · MS-01 | `SPRING_DATASOURCE_URL` | Cadena JDBC del *pooler* de Supabase, sin credenciales; reemplaza la de `application.yml` |
+| Render · MS-01 | `TZ` | `America/Bogota`: las fechas que registra el servicio quedan con la hora de Colombia |
 | Render · MS-01 | `PORT` | La asigna Render |
-| Render · MS-02 | `SPRING_DATASOURCE_URL` | Cadena JDBC del *Session pooler* del proyecto de Supabase de MS-02, sin credenciales |
-| Render · MS-02 | `SPRING_DATASOURCE_USERNAME` | Usuario del pooler: `postgres.` seguido del código del proyecto |
+| Render · MS-02 | `SPRING_DATASOURCE_URL` | Cadena JDBC del *Session pooler* del proyecto de Supabase de MS-02, sin credenciales; reemplaza la de `application.yml` |
+| Render · MS-02 | `SPRING_DATASOURCE_USERNAME` | Usuario del pooler: `postgres.` seguido del código del proyecto; reemplaza el de `application.yml` |
 | Render · MS-02 | `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de MS-02 |
+| Render · MS-02 | `TZ` | `America/Bogota`: las fechas de las inscripciones, las revisiones, los avales y los formatos quedan con la hora de Colombia |
+| Render · MS-02 | `IDENTIDAD_URL` | Opcional: la dirección de MS-01; sin ella, MS-02 usa la de Render |
 | Render · MS-02 | `PORT` | La asigna Render |
 | Vercel · cliente | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_ACADEMICO`, `VITE_API_LEGALIZACION` | Las mismas del `.env` local, con las direcciones públicas de MS-01 y MS-02 |
 
@@ -133,7 +137,8 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 
 - **MS-01:** Render construye la imagen con el `Dockerfile` de dos etapas de `backend/geprac-academico` —Maven compila el proyecto y una imagen mínima de Java 21 ejecuta el binario con un usuario sin privilegios— y la despliega con cada commit en la rama `develop`.
 - **MS-02:** igual que MS-01, con el `Dockerfile` de `backend/geprac-legalizacion`. Un filtro de construcción hace que solo se vuelva a desplegar cuando un commit en `develop` cambia esa carpeta.
-- **Cliente web:** Vercel.
+- **Cliente web:** Vercel, también desde la rama `develop`.
+- **Ramas:** `develop` integra los cambios de los tres y es la que despliegan Render y Vercel; `main` guarda la versión entregada, con su etiqueta: `v1.0.0` para la entrega final.
 - **Token de acceso:** la migración V4 de MS-01 crea la función `identidad.claims_del_token`, que añade al token el rol, el programa y el identificador del estudiante; con eso cada microservicio autoriza sin consultar al otro. Se activa una sola vez en Supabase, en el proyecto de MS-01: *Authentication → Hooks → Customize Access Token (JWT) Claims*, tipo Postgres, esquema `identidad`, función `claims_del_token`.
 - El plan gratuito de Render suspende el servicio tras un rato sin uso. La primera petición puede tardar unos 50 segundos mientras despierta, y el cliente la espera hasta 60.
 
@@ -145,35 +150,41 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 
 ## Datos de la demostración
 
-Los cinco casos de uso del prototipo funcional parten de datos que, en el software, crean casos de uso que se programan para la entrega final: el rol de cada cuenta y los semestres con su tutor designado (CU-04), el registro del estudiante (CU-01), el catálogo de prácticas (CU-02) y las inscripciones enviadas (CU-05). Los dos archivos de `infra/db` los cargan, en este orden:
+La demostración final recorre los nueve casos de uso con las cuentas de los tres integrantes. Los dos archivos de `infra/db` dejan su punto de partida, en este orden:
 
-1. **`semilla_identidad.sql`**, en el *SQL Editor* del proyecto de Supabase de MS-01. Antes, las tres cuentas deben existir en *Authentication → Users*. Asigna los roles —Oscar, director de LEI; Darien, tutor académico; José, estudiante— y registra al estudiante con su hoja de vida. Su última columna entrega tres líneas.
-2. **`semilla_legalizacion.sql`**, en el *SQL Editor* del proyecto de Supabase de MS-02, ya desplegado con la migración V2. En las líneas marcadas se copian las tres que entregó el archivo anterior. Carga los semestres 2025-2, 2026-1 y 2026-2, solo el último abierto; las ocho prácticas de LEI; ocho instituciones receptoras, y catorce inscripciones en los cinco estados: tres de José y once de estudiantes ficticios, sin cuenta, que solo aparecen en las bandejas y en el historial.
+1. **`semilla_identidad.sql`**, en el *SQL Editor* del proyecto de Supabase de MS-01. Antes, las tres cuentas deben existir en *Authentication → Users*. Asigna los roles —Oscar, director de LEI; Darien, tutor académico; José, estudiante—, registra al estudiante con su hoja de vida y añade una cuenta ficticia sin rol, la de Tatiana Lizcano Rojas, que no existe en Supabase Auth y solo aparece en la preparación del semestre. Su última columna entrega tres líneas.
+2. **`semilla_legalizacion.sql`**, en el *SQL Editor* del proyecto de Supabase de MS-02. En las líneas marcadas se copian las tres que entregó el archivo anterior. Carga los semestres 2025-2, 2026-1 y 2026-2, solo el último abierto, con el tutor de cada práctica, salvo la 8 del 2026-2; las ocho prácticas de LEI; ocho instituciones receptoras, y trece inscripciones en los cinco estados: las de las prácticas 1 y 2 de José, avaladas, y once de estudiantes ficticios, sin cuenta, que solo aparecen en las bandejas y en el historial. La de la práctica 3 la crea José en la demostración.
 
-Los dos archivos se pueden ejecutar las veces que haga falta sin duplicar nada, y ninguno lleva contraseñas. Para repetir la demostración desde el principio se ejecuta de nuevo `semilla_legalizacion.sql` con `volver_a_empezar` en `true`.
+Los dos archivos se pueden ejecutar las veces que haga falta sin duplicar nada, y ninguno lleva contraseñas. Para repetir la demostración desde el principio, se ejecutan otra vez, en el mismo orden, con `volver_a_empezar` en `true`: borran lo que la demostración creó y devuelven a su punto de partida el perfil de José, el catálogo, los tutores y el semestre.
 
 | Cuenta | Rol | Lo que encuentra al ingresar |
 |---|---|---|
-| Oscar Iván Blanco Díaz | Director del Programa de LEI | Tres inscripciones por avalar (P-17), el catálogo de instituciones (P-14) y el historial del programa (P-19) |
-| Darien Asdrwal Pesca Ojeda | Tutor académico | Cinco inscripciones por revisar (P-10), entre ellas la de José, y el historial de sus prácticas (P-19) |
-| José Fernando Rincón Barrios | Estudiante Practicante | Sus ocho prácticas (P-02): la 1 y la 2 avaladas, con sus formatos (P-09), y la 3 en revisión |
+| Oscar Iván Blanco Díaz | Director del Programa de LEI | Tres inscripciones por avalar (P-17); el semestre 2026-2 abierto, la cuenta de Tatiana sin rol y la práctica 8 sin tutor (P-16); las ocho prácticas del catálogo (P-12), las instituciones (P-14) y el historial del programa (P-19) |
+| Darien Asdrwal Pesca Ojeda | Tutor académico | Cuatro inscripciones por revisar (P-10) y el historial de sus prácticas (P-19) |
+| José Fernando Rincón Barrios | Estudiante Practicante | Su perfil completo (P-03 y P-04) y sus ocho prácticas (P-02): la 1 y la 2 avaladas, cuyos formatos puede emitir (P-09), y la 3 por inscribir (P-05 a P-08) |
+
+El recorrido: Oscar registra una institución (CU-03), añade una actividad a la práctica 3 (CU-02), le asigna a Tatiana el rol de tutora y le designa la práctica 8 (CU-04); José añade una referencia a su hoja de vida (CU-01) e inscribe la práctica 3 en la institución nueva (CU-05); Darien la devuelve, José la corrige y la reenvía, y Darien la aprueba (CU-06); Oscar la avala (CU-07); José emite y descarga sus cuatro formatos (CU-08), y Oscar y Darien la encuentran en sus historiales (CU-09).
 
 ## Estado del desarrollo
 
-Al segundo avance, el prototipo funcional opera de punta a punta cinco de los nueve casos de uso:
+La versión 1.0.0, de la entrega final, opera de punta a punta los nueve casos de uso:
 
-| Caso de uso | Pantallas | Rutas de MS-02 |
+| Caso de uso | Pantallas | Rutas |
 |---|---|---|
-| CU-03 Gestionar instituciones receptoras | P-14, P-15 | `GET` y `POST /instituciones`, `PUT` y `DELETE /instituciones/{id}` |
-| CU-06 Revisar la inscripción | P-10, P-11 | `GET /revisiones/pendientes`, `POST /revisiones/{id}` |
-| CU-07 Avalar la inscripción | P-17, P-18 | `GET /avales/pendientes`, `POST /avales/{id}` |
-| CU-08 Emitir los formatos institucionales | P-09 | `GET` y `POST /formatos?inscripcion={id}`, `GET /formatos/{id}/archivo` |
-| CU-09 Consultar el historial de prácticas | P-02, P-19 | `GET /historial` |
+| CU-01 Mantener perfil del estudiante | P-03, P-04 | MS-01: `GET` y `PUT /estudiantes/me`, `GET` y `PUT /estudiantes/me/hoja-vida`, `POST /estudiantes/me/{bloque}`, `PUT` y `DELETE /estudiantes/me/{bloque}/{id}`, con `formaciones`, `experiencias` o `referencias` como bloque |
+| CU-02 Gestionar el catálogo de prácticas | P-12, P-13 | MS-02: `GET` y `POST /practicas`, `PUT` y `DELETE /practicas/{id}` |
+| CU-03 Gestionar instituciones receptoras | P-14, P-15 | MS-02: `GET` y `POST /instituciones`, `PUT` y `DELETE /instituciones/{id}` |
+| CU-04 Preparar el semestre | P-16 | MS-01: `GET /usuarios`, `PUT /usuarios/{id}/rol`. MS-02: `GET /semestres/preparacion`, `POST /semestres`, `POST /semestres/{id}/cierre`, `POST` y `PUT /semestres/abierto/practicas/{practicaId}/tutor` |
+| CU-05 Inscribir la práctica del periodo | P-05 a P-08 | MS-02: `POST /inscripciones`, `PUT /inscripciones/{id}`, `POST /inscripciones/{id}/envio`, `GET /inscripciones/actual` |
+| CU-06 Revisar la inscripción | P-10, P-11 | MS-02: `GET /revisiones`, `GET /revisiones/pendientes`, `POST /revisiones/{id}` |
+| CU-07 Avalar la inscripción | P-17, P-18 | MS-02: `GET /avales/pendientes`, `POST /avales/{id}` |
+| CU-08 Emitir los formatos institucionales | P-09 | MS-02: `GET` y `POST /formatos?inscripcion={id}`, `GET /formatos/{id}/archivo` |
+| CU-09 Consultar el historial de prácticas | P-02, P-19 | MS-02: `GET /historial` |
 
-- **MS-01:** además del estado del servicio y de `GET /programas`, expone `GET /usuarios/me`, la cuenta de quien ingresa, que se registra en su primer ingreso, y `GET /usuarios`, la lista de cuentas con la que la Dirección ve el nombre del tutor que aprobó cada inscripción. La migración V4 añade al token el rol, el programa y el estudiante.
-- **MS-02:** las rutas de la tabla, cada una abierta solo al rol que le corresponde según el token. La migración V2 pone en vigencia las plantillas de los cuatro formatos, que se emiten en PDF.
-- **Cliente web:** las pantallas de la tabla y el ingreso (P-01), con la hoja de estilos del prototipo de alta fidelidad.
-- CU-01, CU-02, CU-04 y CU-05 se programan para la entrega final; en el prototipo, lo que producen lo aportan los datos de la demostración.
+- **MS-01:** además, `GET /usuarios/me`, la cuenta de quien ingresa, que se registra en su primer ingreso; `GET /programas`, y `GET /usuarios/{id}/rol`, que consulta MS-02. Cinco migraciones; la V4 añade al token el rol, el programa y el estudiante.
+- **MS-02:** cada ruta se abre solo al rol que le corresponde según el token. Al iniciar la inscripción le pide a MS-01 el expediente del estudiante, y al designar un tutor, su rol, con el token de quien hace la petición. Tres migraciones; la V2 pone en vigencia las plantillas de los cuatro formatos, que se emiten en PDF.
+- **Cliente web:** las diecinueve pantallas del prototipo de alta fidelidad, con el ingreso (P-01) y el menú de cada rol.
+- **Pruebas:** `mvnw test` en cada microservicio, sin base de datos —59 pruebas en MS-01 y 143 en MS-02—, y `npm run lint` y `npm run build` en el cliente.
 
 ## Entregas
 
@@ -181,4 +192,4 @@ Al segundo avance, el prototipo funcional opera de punta a punta cinco de los nu
 |---|---|
 | Primer avance · Propuesta | 30 de agosto de 2026 |
 | Segundo avance · Prototipo funcional | 11 de octubre de 2026 |
-| Entrega final · Aplicación | 15 de noviembre de 2026 |
+| Entrega final · Aplicación · versión 1.0.0 | 15 de noviembre de 2026 |
