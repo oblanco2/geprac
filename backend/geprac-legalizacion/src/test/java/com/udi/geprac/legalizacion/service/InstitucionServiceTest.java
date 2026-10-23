@@ -7,10 +7,14 @@ import com.udi.geprac.legalizacion.dto.InstitucionDto;
 import com.udi.geprac.legalizacion.repository.InstitucionRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import static com.udi.geprac.legalizacion.Fabrica.ingresa;
 import static com.udi.geprac.legalizacion.Fabrica.poner;
+import static com.udi.geprac.legalizacion.Fabrica.sale;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,7 +25,8 @@ import static org.mockito.Mockito.mock;
 /**
  * Las reglas de CU-03 sin base de datos: una institución no se repite en la
  * misma ciudad, sus contactos se corrigen sin perder los que quedan, y la que
- * tiene inscripciones no se elimina.
+ * tiene inscripciones no se elimina. Al estudiante el catálogo solo le
+ * presenta las activas (CU-05, paso 5).
  *
  * @author Darien Asdrwal Pesca Ojeda
  */
@@ -29,6 +34,28 @@ class InstitucionServiceTest {
 
     private final InstitucionRepository instituciones = mock(InstitucionRepository.class);
     private final InstitucionService servicio = new InstitucionService(instituciones);
+
+    @AfterEach
+    void cierra() {
+        sale();
+    }
+
+    @Test
+    void elDirectorVeTodoElCatalogoYElEstudianteSoloLasActivas() {
+        Institucion activa = poner(new Institucion(), "id", 1L);
+        activa.setRazonSocial("Jardín Los Cerezos");
+        activa.setActiva(true);
+        Institucion retirada = poner(new Institucion(), "id", 2L);
+        retirada.setRazonSocial("Jardín Mis Pequeños");
+        retirada.setActiva(false);
+        given(instituciones.findAllByOrderByRazonSocial()).willReturn(List.of(activa, retirada));
+
+        ingresa(UUID.randomUUID(), "DIRECTOR", "programa", "LEI");
+        assertThat(servicio.listarInstituciones()).extracting(InstitucionDto::id).containsExactly(1L, 2L);
+
+        ingresa(UUID.randomUUID(), "ESTUDIANTE", "programa", "LEI", "estudiante_id", 7L);
+        assertThat(servicio.listarInstituciones()).extracting(InstitucionDto::id).containsExactly(1L);
+    }
 
     @Test
     void unaInstitucionNoSeRepiteEnLaMismaCiudad() {

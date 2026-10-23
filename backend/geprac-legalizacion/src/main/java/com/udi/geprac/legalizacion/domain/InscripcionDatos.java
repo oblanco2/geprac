@@ -51,7 +51,7 @@ public class InscripcionDatos {
     @Column(length = 10)
     private String genero;
 
-    @Column(name = "estado_civil", length = 20)
+    @Column(name = "estado_civil", length = 25)
     private String estadoCivil;
 
     @Column(length = 80)
@@ -137,6 +137,62 @@ public class InscripcionDatos {
     private String horarioEstandar;
 
     protected InscripcionDatos() { }   // exigido por JPA
+
+    /** CU-05, paso 4: la copia de una inscripción nueva, que comparte su llave. */
+    public InscripcionDatos(Inscripcion inscripcion) {
+        this.inscripcion = inscripcion;
+    }
+
+    /** CU-05, paso 4: el contenido de la práctica, tomado del catálogo en el momento de inscribir. */
+    public void copiarPractica(Practica p) {
+        nombrePractica = p.getNombre();
+        objetivoGeneral = p.getObjetivoGeneral();
+        horarioEstandar = p.getHorarioEstandar();
+    }
+
+    /** CU-05, paso 10: los datos de la institución receptora; sin institución, quedan vacíos. */
+    public void copiarInstitucion(Institucion i) {
+        institucionRazonSocial = i == null ? null : i.getRazonSocial();
+        institucionNit = i == null ? null : i.getNit();
+        institucionDireccion = i == null ? null : i.getDireccion();
+        institucionCiudad = i == null ? null : i.getCiudad();
+        institucionTelefono = i == null ? null : i.getTelefono();
+        institucionCorreo = i == null ? null : i.getCorreo();
+        institucionSitioWeb = i == null ? null : i.getSitioWeb();
+        institucionRepresentante = i == null ? null : i.getRepresentanteLegal();
+    }
+
+    /** CU-05, paso 10: los datos del contacto del escenario; sin contacto, quedan vacíos. */
+    public void copiarContacto(ContactoInstitucion c) {
+        contactoNombre = c == null ? null : c.getNombre();
+        contactoCargo = c == null ? null : c.getCargo();
+        contactoTelefono = c == null ? null : c.getTelefono();
+        contactoCelular = c == null ? null : c.getCelular();
+        contactoCorreo = c == null ? null : c.getCorreo();
+    }
+
+    // Los datos del registro del estudiante, que se copian de MS-01 al iniciar la inscripción (CU-05,
+    // paso 4); la dirección, el celular y el correo personal los puede ajustar después en ella (paso 11).
+    public void setNombres(String v)             { nombres = v; }
+    public void setApellidos(String v)           { apellidos = v; }
+    public void setTipoDocumento(String v)       { tipoDocumento = v; }
+    public void setNumeroDocumento(String v)     { numeroDocumento = v; }
+    public void setLugarExpedicion(String v)     { lugarExpedicion = v; }
+    public void setFechaNacimiento(LocalDate v)  { fechaNacimiento = v; }
+    public void setLugarNacimiento(String v)     { lugarNacimiento = v; }
+    public void setGenero(String v)              { genero = v; }
+    public void setEstadoCivil(String v)         { estadoCivil = v; }
+    public void setEps(String v)                 { eps = v; }
+    public void setDireccion(String v)           { direccion = v; }
+    public void setBarrio(String v)              { barrio = v; }
+    public void setCiudad(String v)              { ciudad = v; }
+    public void setTelefonoFijo(String v)        { telefonoFijo = v; }
+    public void setCelular(String v)             { celular = v; }
+    public void setCorreoPersonal(String v)      { correoPersonal = v; }
+    public void setNombrePrograma(String v)      { nombrePrograma = v; }
+    public void setSemestreCursado(Integer v)    { semestreCursado = v; }
+    public void setPerfilProfesional(String v)   { perfilProfesional = v; }
+    public void setHerramientasTrabajo(String v) { herramientasTrabajo = v; }
 
     public Long getInscripcionId() { return inscripcionId; }
     public String getNombres() { return nombres; }

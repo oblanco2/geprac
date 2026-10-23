@@ -91,6 +91,61 @@ public class Inscripcion {
 
     protected Inscripcion() { }   // exigido por JPA
 
+    /**
+     * CU-05, paso 4: la inscripción nace en borrador, con su copia del
+     * contenido de la práctica tomado del catálogo. La copia del registro del
+     * estudiante la completa el servicio con lo que responde MS-01.
+     */
+    public Inscripcion(Long estudianteId, Practica practica, Semestre semestre) {
+        this.estudianteId = estudianteId;
+        this.practica = practica;
+        this.semestre = semestre;
+        this.estado = EstadoInscripcion.BORRADOR;
+        this.creadaEn = LocalDateTime.now();
+        this.datos = new InscripcionDatos(this);
+        datos.copiarPractica(practica);
+        practica.getObjetivos().forEach(o -> objetivos.add(new InscripcionObjetivo(this, o.getPosicion(), o.getTexto())));
+        practica.getActividades().forEach(a -> actividades.add(new InscripcionActividad(this, a.getPosicion(), a.getTexto())));
+    }
+
+    /**
+     * CU-05, paso 6: la institución receptora, con la copia de sus datos. Si
+     * cambia, el contacto escogido era de la anterior y se quita: el estudiante
+     * vuelve a escogerlo en el segundo paso.
+     */
+    public void elegirInstitucion(Institucion nueva) {
+        if (institucion == null || !institucion.getId().equals(nueva.getId())) {
+            contacto = null;
+            datos.copiarContacto(null);
+        }
+        institucion = nueva;
+        datos.copiarInstitucion(nueva);
+    }
+
+    /**
+     * CU-05, pasos 8 a 10: el contacto que será el tutor del escenario y las
+     * fechas de la práctica. Se copian los datos vigentes de la institución y
+     * del contacto, que son los que imprimen los formatos.
+     */
+    public void elegirEscenario(ContactoInstitucion contacto, LocalDate fechaInicio, LocalDate fechaFin) {
+        this.contacto = contacto;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+        datos.copiarInstitucion(institucion);
+        datos.copiarContacto(contacto);
+    }
+
+    /** Solo el borrador y la devuelta admiten cambios del estudiante (CU-05, variaciones 6.1 y 16.2). */
+    public boolean editable() {
+        return estado == EstadoInscripcion.BORRADOR || estado == EstadoInscripcion.DEVUELTA;
+    }
+
+    /** CU-05, paso 15 y variación 16.2: pasa a la bandeja del tutor con la fecha del envío o del reenvío. */
+    public void enviar() {
+        estado = EstadoInscripcion.ENVIADA;
+        enviadaEn = LocalDateTime.now();
+    }
+
     /** CU-06, paso 8: el resultado de la revisión cambia el estado. */
     public void resolver(Revision revision) {
         revisiones.add(revision);

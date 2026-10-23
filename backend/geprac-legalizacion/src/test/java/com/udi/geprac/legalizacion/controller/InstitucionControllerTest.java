@@ -21,9 +21,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Las instituciones con la seguridad real: solo el director las consulta y las
- * mantiene, y una institución sin contactos o con un correo mal escrito no se
- * guarda.
+ * Las instituciones con la seguridad real: solo el director las mantiene, el
+ * estudiante solo consulta el catálogo para escoger la suya (CU-05), y una
+ * institución sin contactos o con un correo mal escrito no se guarda.
  *
  * @author Darien Asdrwal Pesca Ojeda
  */
@@ -51,6 +51,17 @@ class InstitucionControllerTest {
     @Test
     void otroRolNoEntraAlCatalogo() throws Exception {
         mvc.perform(get("/instituciones").with(jwt().authorities(new SimpleGrantedAuthority("ROLE_TUTOR"))))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void elEstudianteConsultaElCatalogoPeroNoLoModifica() throws Exception {
+        SimpleGrantedAuthority estudiante = new SimpleGrantedAuthority("ROLE_ESTUDIANTE");
+        given(servicio.listarInstituciones()).willReturn(List.of());
+
+        mvc.perform(get("/instituciones").with(jwt().authorities(estudiante))).andExpect(status().isOk());
+        mvc.perform(post("/instituciones").with(jwt().authorities(estudiante))
+                .contentType(MediaType.APPLICATION_JSON).content("{}"))
             .andExpect(status().isForbidden());
     }
 

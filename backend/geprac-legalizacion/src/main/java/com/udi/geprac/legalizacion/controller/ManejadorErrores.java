@@ -2,6 +2,7 @@ package com.udi.geprac.legalizacion.controller;
 
 import com.udi.geprac.legalizacion.service.CampoInvalidoException;
 import com.udi.geprac.legalizacion.service.IdentidadNoDisponibleException;
+import com.udi.geprac.legalizacion.service.RegistroIncompletoException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -26,7 +27,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * no se puede leer— los resuelve la clase base con el mismo formato. Los datos
  * que no pasan la validación, y las reglas que fallan en un campo concreto,
  * llevan el mensaje de cada campo en la propiedad «campos», para que el
- * cliente los señale junto al campo, igual que en MS-01.
+ * cliente los señale junto al campo, igual que en MS-01. Lo que le falta a un
+ * registro para completar un paso va en la propiedad «faltan».
  *
  * @author Darien Asdrwal Pesca Ojeda
  */
@@ -46,11 +48,19 @@ public class ManejadorErrores extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(problema);
     }
 
-    /** Una regla del caso de uso que falla en un campo: su estado, con el mensaje en ese campo. */
+    /** Una regla del caso de uso que falla en uno o varios campos: su estado, con el mensaje en cada campo. */
     @ExceptionHandler(CampoInvalidoException.class)
     public ProblemDetail campoInvalido(CampoInvalidoException e) {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(e.getEstado(), e.getMessage());
-        problema.setProperty("campos", Map.of(e.getCampo(), e.getMessage()));
+        problema.setProperty("campos", e.getCampos());
+        return problema;
+    }
+
+    /** Un registro al que le falta lo que exige el paso: 409, con lo que falta en la propiedad «faltan». */
+    @ExceptionHandler(RegistroIncompletoException.class)
+    public ProblemDetail registroIncompleto(RegistroIncompletoException e) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+        problema.setProperty("faltan", e.getFaltan());
         return problema;
     }
 
