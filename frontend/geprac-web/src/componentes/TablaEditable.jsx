@@ -1,15 +1,18 @@
 /**
  * Tabla que se edita fila por fila, como en el prototipo: los contactos de una
- * institución (CU-03) y las entradas de la hoja de vida (CU-01). Mientras una
- * fila está en edición, las demás acciones de la tabla esperan. Cada fila se
- * comprueba antes de quedar en la lista; según la pantalla, la lista se guarda
- * con el formulario al que pertenece o cada fila se guarda sola (guardaSola).
+ * institución (CU-03), las entradas de la hoja de vida (CU-01), y los roles de
+ * las cuentas y los tutores de las prácticas (CU-04). Mientras una fila está en
+ * edición, las demás acciones de la tabla esperan. Cada fila se comprueba antes
+ * de quedar en la lista; según la pantalla, la lista se guarda con el
+ * formulario al que pertenece o cada fila se guarda sola (guardaSola).
  *
  * Una columna se edita con un campo de texto, correo, teléfono, número o fecha,
  * con una lista desplegable (tipo 'sel', con sus ops) o, si es doble, con dos
- * campos rotulados en la misma celda, como el jefe inmediato con su cargo.
- * max limita las filas y presenta su cuenta; validar(valores) añade las
- * comprobaciones que cruzan dos campos de la fila.
+ * campos rotulados en la misma celda, como el jefe inmediato con su cargo; una
+ * columna fija se presenta pero no se edita. max limita las filas y presenta
+ * su cuenta; validar(valores, fila) añade las comprobaciones que cruzan dos
+ * campos o que dependen de la fila. Sin eliminar no hay botón de eliminar, y
+ * editar puede nombrar la acción de cada fila, o quitarla.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -18,8 +21,8 @@ import { useAvisar, useConfirmar } from '../sesion/contexto'
 import { MSJ_TEL, correoValido, telefonoValido } from '../lib/formato'
 import { Boton, Tabla } from './controles'
 
-/** Los campos que se editan: los de cada columna, o los dos de una columna doble. */
-const campos = (columnas) => columnas.flatMap((c) => c.doble || [c])
+/** Los campos que se editan: los de cada columna, o los dos de una columna doble; las fijas no se editan. */
+const campos = (columnas) => columnas.flatMap((c) => (c.fijo ? [] : c.doble || [c]))
 const vacia = (columnas) => Object.fromEntries(campos(columnas).map((c) => [c.k, '']))
 
 /** Comprobaciones de un campo: obligatorio, correo, teléfono y número entero. */
@@ -58,7 +61,7 @@ function Editor({ col, valor, error, cambiar, rotulo }) {
 }
 
 export default function TablaEditable({ titulo, entrada, anadir = 'Añadir', columnas, filas, nombre, vacio, guardar, eliminar,
-  aviso, alEditar, max, ayuda, validar, guardaSola }) {
+  aviso, alEditar, max, ayuda, validar, guardaSola, editar: accionEditar = 'Editar', sinAnadir, antes }) {
   const avisar = useAvisar()
   const confirmar = useConfirmar()
   const idAyuda = useId()
@@ -84,7 +87,7 @@ export default function TablaEditable({ titulo, entrada, anadir = 'Añadir', col
     const v = Object.fromEntries(Object.entries(edicion.valores).map(([k, x]) => [k, typeof x === 'string' ? x.trim() : x]))
     const errores = {}
     campos(columnas).forEach((c) => { const m = comprobar(c, v[c.k]); if (m) errores[c.k] = m })
-    Object.assign(errores, Object.keys(errores).length ? {} : validar?.(v) || {})
+    Object.assign(errores, Object.keys(errores).length ? {} : validar?.(v, filas.find((f) => f.id === edicion.id)) || {})
     if (Object.keys(errores).length) {
       setEdicion((e) => ({ ...e, errores }))
       avisar('La fila tiene datos por corregir: no se guardó.', 'err')
@@ -127,7 +130,7 @@ export default function TablaEditable({ titulo, entrada, anadir = 'Añadir', col
 
   const cols = [...columnas.map((c) => ({ l: c.l, w: c.w, obl: c.obl || c.doble?.some((d) => d.obl) })), { l: '', w: 'l' }]
   const enEdicion = (id) => edicion && edicion.id === id
-  const celdaDeEdicion = (c) => (c.doble ? (
+  const celdaDeEdicion = (c, fila) => (c.fijo ? (fila ? vista(c, fila) : '—') : c.doble ? (
     <div className="doble" key={c.k}>
       {c.doble.map((d) => <Editor key={d.k} col={d} valor={edicion.valores[d.k]} error={edicion.errores[d.k]} cambiar={cambiar} rotulo />)}
     </div>
@@ -136,7 +139,7 @@ export default function TablaEditable({ titulo, entrada, anadir = 'Añadir', col
     clave: id ?? 'nueva',
     clase: 'edicion',
     celdas: [
-      ...columnas.map(celdaDeEdicion),
+      ...columnas.map((c) => celdaDeEdicion(c, filas.find((f) => f.id === id))),
       <div className="acc-grupo" key="acc">
         <button type="button" className="acc" onClick={listo} disabled={ocupada != null}
           aria-label={`Listo: guardar ${id == null ? 'la fila nueva' : nombre(filas.find((f) => f.id === id))}`}>
@@ -149,18 +152,26 @@ export default function TablaEditable({ titulo, entrada, anadir = 'Añadir', col
     ],
   })
 
-  const vistas = filas.map((f) => (enEdicion(f.id) ? filaDeEdicion(f.id) : {
-    clave: f.id,
-    celdas: [
-      ...columnas.map((c) => (c.ver ? c.ver(f) : (f[c.k] ?? '') === '' ? '—' : f[c.k])),
-      <div className="acc-grupo" key="acc">
-        <button type="button" className="acc" disabled={!!edicion || ocupada != null} onClick={() => editar(f)}
-          aria-label={`Editar ${nombre(f)}`}>Editar</button>
-        <button type="button" className="acc quitar" disabled={!!edicion || ocupada != null} onClick={() => quitar(f)}
-          aria-label={`Eliminar ${nombre(f)}`}>{ocupada === f.id ? <><span className="spin" aria-hidden="true" />Eliminando…</> : 'Eliminar'}</button>
-      </div>,
-    ],
-  }))
+  const vistas = filas.map((f) => {
+    if (enEdicion(f.id)) return filaDeEdicion(f.id)
+    const rotulo = typeof accionEditar === 'function' ? accionEditar(f) : accionEditar
+    return {
+      clave: f.id,
+      celdas: [
+        ...columnas.map((c) => vista(c, f)),
+        <div className="acc-grupo" key="acc">
+          {rotulo && (
+            <button type="button" className="acc" disabled={!!edicion || ocupada != null} onClick={() => editar(f)}
+              aria-label={`${rotulo} ${nombre(f)}`}>{rotulo}</button>
+          )}
+          {eliminar && (
+            <button type="button" className="acc quitar" disabled={!!edicion || ocupada != null} onClick={() => quitar(f)}
+              aria-label={`Eliminar ${nombre(f)}`}>{ocupada === f.id ? <><span className="spin" aria-hidden="true" />Eliminando…</> : 'Eliminar'}</button>
+          )}
+        </div>,
+      ],
+    }
+  })
   if (edicion && edicion.id == null) vistas.push(filaDeEdicion(null))
 
   const textoAyuda = typeof ayuda === 'function' ? ayuda(llena) : ayuda
@@ -168,15 +179,21 @@ export default function TablaEditable({ titulo, entrada, anadir = 'Añadir', col
     <div className="bloque">
       <div className="bloque-cab">
         <h3 className="sec">{titulo}{max != null && <span className="cuenta"> · {filas.length} de {max}</span>}</h3>
-        <Boton tipo="s" disabled={llena} aria-describedby={textoAyuda ? idAyuda : undefined}
-          onClick={() => (edicion ? avisar('Termine primero la fila en edición: pulse «Listo» o «Cancelar».', 'err') : editar(null))}
-          aria-disabled={edicion ? 'true' : undefined}>{anadir}</Boton>
+        {!sinAnadir && (
+          <Boton tipo="s" disabled={llena} aria-describedby={textoAyuda ? idAyuda : undefined}
+            onClick={() => (edicion ? avisar('Termine primero la fila en edición: pulse «Listo» o «Cancelar».', 'err') : editar(null))}
+            aria-disabled={edicion ? 'true' : undefined}>{anadir}</Boton>
+        )}
       </div>
       {textoAyuda && <p className="ayuda" id={idAyuda}>{textoAyuda}</p>}
+      {antes}
       <Tabla columnas={cols} filas={vistas} titulo={titulo} vacio={vacio || 'Todavía no hay entradas. Use «Añadir».'} />
     </div>
   )
 }
+
+/** Lo que presenta una celda fuera de edición. */
+const vista = (c, fila) => (c.ver ? c.ver(fila) : (fila[c.k] ?? '') === '' ? '—' : fila[c.k])
 
 /** Los valores de los campos de una fila, como texto para los controles; los nulos quedan vacíos. */
 function comoTexto(columnas, fila) {

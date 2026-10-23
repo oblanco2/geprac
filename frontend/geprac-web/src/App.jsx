@@ -1,9 +1,9 @@
 /**
  * El cliente web de GEPRAC: las rutas de los tres roles con las pantallas de los
- * casos de uso que ya tienen pantalla —CU-01, CU-03, CU-05, CU-06, CU-07, CU-08
- * y CU-09— y los proveedores que comparten todas: la sesión, los avisos y la
- * ventana de confirmación. Las direcciones van tras #, así el hospedaje estático
- * sirve cualquier pantalla y los botones atrás y adelante funcionan.
+ * nueve casos de uso y los proveedores que comparten todas: la sesión, los
+ * avisos y la ventana de confirmación. Las direcciones van tras #, así el
+ * hospedaje estático sirve cualquier pantalla y los botones atrás y adelante
+ * funcionan.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -24,6 +24,9 @@ import Bandeja from './paginas/tutor/Bandeja'
 import Revisar from './paginas/tutor/Revisar'
 import BandejaAval from './paginas/director/BandejaAval'
 import Avalar from './paginas/director/Avalar'
+import PreparacionSemestre from './paginas/director/PreparacionSemestre'
+import Practicas from './paginas/director/Practicas'
+import EditorPractica from './paginas/director/EditorPractica'
 import Instituciones from './paginas/director/Instituciones'
 import EditorInstitucion from './paginas/director/EditorInstitucion'
 import HistorialPracticas from './paginas/comun/HistorialPracticas'
@@ -55,6 +58,9 @@ const rutas = createHashRouter([
     children: [
       { path: '/aval', element: <BandejaAval /> },                            // P-17 · CU-07
       { path: '/aval/:id', element: <Avalar /> },                             // P-18 · CU-07
+      { path: '/semestre', element: <PreparacionSemestre /> },                // P-16 · CU-04
+      { path: '/practicas', element: <Practicas /> },                         // P-12 · CU-02
+      { path: '/practicas/:id', element: <EditorPractica /> },                // P-13 · CU-02
       { path: '/instituciones', element: <Instituciones /> },                 // P-14 · CU-03
       { path: '/instituciones/:id', element: <EditorInstitucion /> },         // P-15 · CU-03
     ],
