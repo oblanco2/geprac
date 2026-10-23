@@ -1,0 +1,23 @@
+# ══════════════════════════════════════════════════════════════════
+# GEPRAC · Plantilla del formato PR-02 · versión 1
+# Reproduce los campos del acta en que el estudiante declara conocer los
+# términos de la práctica. La diligencia MS-02 con la copia que guarda la
+# inscripción (CU-08). {campo!} es un dato obligatorio.
+# Autor: Darien Asdrwal Pesca Ojeda · modelo de datos y MS-02
+# ══════════════════════════════════════════════════════════════════
+@titulo ACTA DE CONOCIMIENTO DE LOS TÉRMINOS DE LA PRÁCTICA
+@codigo PR-02
+
+= Datos de la práctica
+| Estudiante: {nombres!} {apellidos!} | Documento: {tipoDocumento!} {numeroDocumento!} |
+| Programa: {nombrePrograma!} | Semestre que cursa: {semestreCursado!} |
+| Práctica: {ordenPractica!} · {nombrePractica!} | Periodo académico: {semestre!} |
+| Institución receptora: {institucionRazonSocial!} | Inicio: {fechaInicio!} | Finalización: {fechaFin!} |
+
+= Declaración del estudiante
+Yo, {nombres!} {apellidos!}, identificado(a) con {tipoDocumento!} {numeroDocumento!}, estudiante del programa {nombrePrograma!}, declaro que conozco el Reglamento de Prácticas Profesionales de la Universidad de Investigación y Desarrollo y los términos que rigen la práctica {ordenPractica!} · {nombrePractica!}, que desarrollaré en {institucionRazonSocial!} entre el {fechaInicio!} y el {fechaFin!}.
+Me comprometo a cumplir el horario y las actividades acordados con la institución receptora, a seguir las orientaciones del tutor académico y del tutor del escenario, y a informar a la Dirección del Programa cualquier novedad que afecte el desarrollo de la práctica.
+
+~
+{ciudadEmision}, {fechaEmision}.
+_ {nombres} {apellidos}\nFirma del estudiante | Dirección del Programa\nFirma y sello

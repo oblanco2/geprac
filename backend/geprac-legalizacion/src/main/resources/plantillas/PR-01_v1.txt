@@ -1,0 +1,40 @@
+# ══════════════════════════════════════════════════════════════════
+# GEPRAC · Plantilla del formato PR-01 · versión 1
+# Reproduce los campos del formato institucional de hoja de vida del
+# estudiante practicante. La diligencia MS-02 con la copia que guarda la
+# inscripción (CU-08). {campo!} es un dato obligatorio.
+# Autor: Darien Asdrwal Pesca Ojeda · modelo de datos y MS-02
+# ══════════════════════════════════════════════════════════════════
+@titulo HOJA DE VIDA DEL ESTUDIANTE PRACTICANTE
+@codigo PR-01
+
+= 1. Datos personales
+| Nombres: {nombres!} | Apellidos: {apellidos!} |
+| Tipo de documento: {tipoDocumento!} | Número de documento: {numeroDocumento!} | Expedido en: {lugarExpedicion} |
+| Fecha de nacimiento: {fechaNacimiento} | Lugar de nacimiento: {lugarNacimiento} | Género: {genero} | Estado civil: {estadoCivil} |
+| Dirección: {direccion!} | Barrio: {barrio} | Ciudad: {ciudad!} | EPS: {eps} |
+| Teléfono fijo: {telefonoFijo} | Celular: {celular!} | Correo personal: {correoPersonal!} |
+| Programa: {nombrePrograma!} | Semestre que cursa: {semestreCursado!} |
+
+= 2. Perfil profesional
+{perfilProfesional}
+
+= 3. Formación académica
+*[No registra formación académica.] | Nivel: {formaciones.tipo} | Título obtenido: {formaciones.nombre} | Institución: {formaciones.institucion} | Año: {formaciones.anio} |
+
+= 4. Experiencia laboral
+*[No registra experiencia laboral.] | Empresa: {experiencias.empresa} | Cargo: {experiencias.cargo} | Periodo: {experiencias.periodo} |
+* | Jefe inmediato: {experiencias.jefeInmediato} | Cargo del jefe: {experiencias.cargoJefe} | Teléfono: {experiencias.telefonoEmpresa} |
+* | Funciones: {experiencias.funciones} | Logros: {experiencias.logros} |
+* ~
+
+= 5. Referencias personales
+*[No registra referencias personales.] | Nombre: {referencias.nombre} | Cargo: {referencias.cargo} | Empresa: {referencias.empresa} | Teléfono: {referencias.telefono} | Ciudad: {referencias.ciudad} |
+
+= 6. Herramientas de trabajo
+{herramientasTrabajo}
+
+~
+Declaro que la información de esta hoja de vida es veraz.
+{ciudadEmision}, {fechaEmision}.
+_ {nombres} {apellidos}\nFirma del estudiante

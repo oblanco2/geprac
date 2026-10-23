@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: geprac-academico
+    
+  datasource:
+    url: jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:5432/postgres
+    username: postgres.txogxkmtihkqeowmlicm
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: identidad
+
+  flyway:
+    enabled: true
+    schemas: identidad
+    locations: classpath:db/migration
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://txogxkmtihkqeowmlicm.supabase.co/auth/v1/.well-known/jwks.json
+          jws-algorithms: ES256
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      access: read-only

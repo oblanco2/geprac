@@ -1,0 +1,40 @@
+# ══════════════════════════════════════════════════════════════════
+# GEPRAC · Plantilla del formato PR-04 · versión 1
+# Reproduce los campos de la solicitud y aprobación de la práctica. El
+# contacto que escogió el estudiante figura como tutor del escenario, con
+# la dirección de la institución. La diligencia MS-02 con la copia que
+# guarda la inscripción (CU-08). {campo!} es un dato obligatorio.
+# Autor: Darien Asdrwal Pesca Ojeda · modelo de datos y MS-02
+# ══════════════════════════════════════════════════════════════════
+@titulo SOLICITUD Y APROBACIÓN DE PRÁCTICA
+@codigo PR-04
+
+= 1. Datos del estudiante
+| Nombres y apellidos: {nombres!} {apellidos!} | Documento: {tipoDocumento!} {numeroDocumento!} |
+| Programa: {nombrePrograma!} | Semestre: {semestreCursado!} | Celular: {celular!} | Correo: {correoPersonal!} |
+
+= 2. Institución receptora
+| Razón social: {institucionRazonSocial!} | NIT: {institucionNit} |
+| Dirección: {institucionDireccion!} | Ciudad: {institucionCiudad!} | Teléfono: {institucionTelefono!} |
+| Correo: {institucionCorreo} | Sitio web: {institucionSitioWeb} | Representante legal: {institucionRepresentante} |
+
+= 3. Tutor del escenario
+| Nombre: {contactoNombre!} | Cargo: {contactoCargo!} |
+| Teléfono: {contactoTelefono!} | Celular: {contactoCelular} | Correo: {contactoCorreo} |
+| Dirección: {institucionDireccion!}, {institucionCiudad!} |
+
+= 4. Práctica
+| Práctica: {ordenPractica!} · {nombrePractica!} | Periodo académico: {semestre!} |
+| Fecha de inicio: {fechaInicio!} | Fecha de finalización: {fechaFin!} | Horario: {horarioEstandar} |
+| Objetivo general: {objetivoGeneral!} |
+
+= 5. Objetivos específicos
+*[Sin objetivos específicos registrados.] {objetivos.posicion}. {objetivos.texto}
+
+= 6. Actividades
+*[Sin actividades registradas.] {actividades.posicion}. {actividades.texto}
+
+= 7. Aprobación
+La institución receptora acepta al estudiante para desarrollar la práctica descrita, en las fechas indicadas, y la Dirección del Programa la aprueba.
+{ciudadEmision}, {fechaEmision}.
+_ {nombres} {apellidos}\nEstudiante | {contactoNombre}\nTutor del escenario | Dirección del Programa\nFirma y sello
