@@ -57,7 +57,7 @@ public class Estudiante {
     @Column(length = 10)
     private String genero;
 
-    @Column(name = "estado_civil", length = 20)
+    @Column(name = "estado_civil", length = 25)
     private String estadoCivil;
 
     @Column(length = 80)
