@@ -1,9 +1,10 @@
 /**
  * Operaciones de MS-01 Identidad y Perfil Académico que usa el cliente web: la
  * cuenta de quien ingresa, los programas, con cuyo nombre la barra presenta el
- * contexto; para la Dirección del Programa, la lista de cuentas con que
- * presenta el nombre del tutor que aprobó cada inscripción, y para el
- * estudiante, su perfil y su hoja de vida (CU-01).
+ * contexto; para la Dirección del Programa, la lista de cuentas, con que
+ * presenta el nombre del tutor que aprobó cada inscripción, y la asignación del
+ * rol de cada cuenta (CU-04), y para el estudiante, su perfil y su hoja de vida
+ * (CU-01).
  * Cada función lleva el nombre de su operación en el diseño.
  *
  * @author José Fernando Rincón Barrios
@@ -15,6 +16,8 @@ const datos = (r) => r.data
 export const consultarCuenta = () => cliente.get('/usuarios/me').then(datos)
 export const listarProgramas = () => cliente.get('/programas').then(datos)
 export const listarUsuarios = () => cliente.get('/usuarios').then(datos)
+/** El rol de una cuenta: DIRECTOR, TUTOR o ESTUDIANTE; el de director lleva el programa de quien lo asigna. */
+export const asignarRol = (id, rol) => cliente.put(`/usuarios/${id}/rol`, { rol }).then(datos)
 
 export const consultarPerfil = () => cliente.get('/estudiantes/me').then(datos)
 export const guardarPerfil = (perfil) => cliente.put('/estudiantes/me', perfil).then(datos)
