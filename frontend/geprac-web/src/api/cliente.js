@@ -2,8 +2,9 @@
  * Clientes HTTP de los dos microservicios. Cada petición lleva el token de la
  * sesión de Supabase Auth, y los errores se traducen a un mensaje legible en
  * error.mensaje: el detalle del problema que responde el servicio (RFC 9457) o,
- * si no hubo respuesta, la causa probable. error.estado trae el código HTTP y
- * error.campos, el mensaje de cada campo que no pasó la validación. Un 401
+ * si no hubo respuesta, la causa probable. error.estado trae el código HTTP;
+ * error.campos, el mensaje de cada campo que no pasó la validación, y
+ * error.faltan, lo que le falta a un registro para completar un paso. Un 401
  * significa que la sesión ya no vale: se cierra, y las rutas llevan al ingreso.
  *
  * @author José Fernando Rincón Barrios
@@ -39,6 +40,7 @@ function crearCliente(baseURL) {
       }
       error.estado = error.response?.status
       error.campos = datos?.campos ?? {}
+      error.faltan = datos?.faltan ?? null
       if (error.estado === 401) supabase.auth.signOut({ scope: 'local' })
       error.mensaje =
         datos?.detail ??

@@ -1,7 +1,7 @@
 /**
  * Los tres roles del software: cómo se nombran en la barra, qué opciones tiene
- * el menú de cada uno —las de los cinco casos de uso del prototipo funcional:
- * CU-03, CU-06, CU-07, CU-08 y CU-09— y la pantalla con la que empieza.
+ * el menú de cada uno —las de los casos de uso que ya tienen pantalla: CU-01,
+ * CU-03, CU-05, CU-06, CU-07, CU-08 y CU-09— y la pantalla con la que empieza.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -9,7 +9,8 @@
 export const PAPEL = { ESTUDIANTE: 'Estudiante', TUTOR: 'Tutor académico', DIRECTOR: 'Director del programa' }
 
 export const MENUS = {
-  ESTUDIANTE: [['/mis-practicas', 'Mis prácticas'], ['/mis-formatos', 'Mis formatos']],
+  ESTUDIANTE: [['/mis-practicas', 'Mis prácticas'], ['/mi-perfil', 'Mi perfil'], ['/mi-hoja-de-vida', 'Mi hoja de vida'],
+    ['/inscribir', 'Inscribir práctica'], ['/mi-inscripcion', 'Estado de mi inscripción'], ['/mis-formatos', 'Mis formatos']],
   TUTOR: [['/bandeja', 'Bandeja de revisión'], ['/historial', 'Historial de mis prácticas']],
   DIRECTOR: [['/aval', 'Bandeja de aval'], ['/instituciones', 'Instituciones receptoras'], ['/historial', 'Historial del programa']],
 }

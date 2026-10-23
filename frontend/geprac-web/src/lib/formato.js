@@ -1,8 +1,8 @@
 /**
  * Formatos y catálogos que comparten las pantallas: las fechas como las
  * presenta el prototipo (dd/mm/aaaa), los cinco estados de la inscripción con
- * su significado, los semestres del plan de estudios y las comprobaciones de
- * correo y teléfono.
+ * su significado, los semestres del plan de estudios, las opciones que
+ * imprimen los formatos y las comprobaciones de correo, teléfono y documento.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -25,6 +25,33 @@ export const opcionesEstado = (claves = Object.keys(ESTADOS)) => claves.map((k) 
 export const SEMESTRES_PLAN = ['Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo']
 export const ORDINALES = ['primer', 'segundo', 'tercer', 'cuarto', 'quinto', 'sexto', 'séptimo', 'octavo']
 
+/** Las opciones que imprimen los formatos (CU-01, paso 7): las mismas que valida MS-01. */
+export const TIPOS_DOCUMENTO = [['C.C.', 'C.C. · Cédula de ciudadanía'], ['T.I.', 'T.I. · Tarjeta de identidad'], ['C.E.', 'C.E. · Cédula de extranjería']]
+export const GENEROS = ['Femenino', 'Masculino']
+export const ESTADOS_CIVILES = ['Soltero(a)', 'Casado(a)', 'Unión marital de hecho', 'Separado(a)', 'Divorciado(a)', 'Viudo(a)']
+export const TIPOS_FORMACION = ['Secundaria', 'Universitaria', 'Otros']
+
+/** La fecha de hoy en el equipo de quien usa el software, como aaaa-mm-dd. */
+export const hoy = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** El tiempo de una experiencia laboral, como lo pide la hoja de vida: «1 año y 3 meses»; sin retiro, hasta hoy. */
+export function duracion(inicio, fin) {
+  if (!inicio) return '—'
+  const [a1, m1, d1] = inicio.split('-').map(Number)
+  const [a2, m2, d2] = (fin || hoy()).split('-').map(Number)
+  let meses = (a2 - a1) * 12 + (m2 - m1)
+  if (d2 < d1) meses -= 1
+  const anios = Math.floor(meses / 12)
+  const resto = meses % 12
+  const partes = meses < 1 ? ['menos de un mes'] : []
+  if (anios > 0) partes.push(`${anios} ${anios === 1 ? 'año' : 'años'}`)
+  if (resto > 0) partes.push(`${resto} ${resto === 1 ? 'mes' : 'meses'}`)
+  return partes.join(' y ') + (fin ? '' : ' · vigente')
+}
+
 export const MSJ_OBL = 'Este dato es obligatorio: el formato institucional lo exige.'
 export const MSJ_SALIR = 'Hay cambios sin guardar en esta pantalla. Si sale ahora se pierden. ¿Sale de todos modos?'
 export const MSJ_TEL = 'Escriba un teléfono válido: de 7 a 15 dígitos, con espacios o guiones si quiere.'
@@ -33,6 +60,12 @@ export const MSJ_CORREO = 'Escriba un correo válido, como nombre@dominio.com.'
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 /** Vacío o un correo bien formado. */
 export const correoValido = (v) => !v || CORREO.test(v.trim()) || MSJ_CORREO
+/** El número de documento: de 5 a 12 dígitos, con puntos opcionales entre ellos, como lo valida MS-01. */
+export const documentoValido = (v) => {
+  const digitos = v.replace(/\D/g, '').length
+  return (/^\d+(\.\d+)*$/.test(v) && digitos >= 5 && digitos <= 12)
+    || 'Escriba de 5 a 12 dígitos, sin letras ni otros signos; los puntos son opcionales.'
+}
 /** Vacío o un teléfono de 7 a 15 dígitos, con los signos que admiten los servicios. */
 export const telefonoValido = (v) => {
   if (!v) return true

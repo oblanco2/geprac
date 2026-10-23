@@ -16,7 +16,9 @@ export default function Historial({ insc, estudiante = 'Usted', nombres = {} }) 
   const filas = (insc.revisiones || []).map((r) => ({ fecha: r.fecha, quien: nombres[r.revisorId] || 'Tutor académico',
     resultado: r.resultado, motivo: r.motivo }))
   if (insc.enviadaEn) {
-    filas.push({ fecha: insc.enviadaEn, quien: estudiante, resultado: 'ENVIADA', texto: insc.revisiones?.length > 1 ? 'Reenviada' : 'Enviada' })
+    // el envío que guarda MS-02 es el último: si hubo una revisión antes, fue un reenvío
+    const reenvio = (insc.revisiones || []).some((r) => String(r.fecha) < String(insc.enviadaEn))
+    filas.push({ fecha: insc.enviadaEn, quien: estudiante, resultado: 'ENVIADA', texto: reenvio ? 'Reenviada' : 'Enviada' })
   }
   if (insc.aval) {
     filas.push({ fecha: insc.aval.fecha, quien: nombres[insc.aval.directorId] || 'Dirección del Programa', resultado: 'AVALADA' })

@@ -3,8 +3,10 @@
  * cliente consulta la cuenta en MS-01 (si es el primer ingreso, MS-01 la
  * registra) y lee del token el rol, el programa y el registro de estudiante,
  * que el hook de MS-01 añade al emitirlo. Si el token se emitió antes de que la
- * cuenta tuviera esos datos, lo renueva para que los traiga. Una cuenta sin rol
- * no entra: la Dirección del Programa debe asignárselo.
+ * cuenta tuviera esos datos, lo renueva para que los traiga; lo mismo hace
+ * renovar(), que llama Mi perfil cuando el estudiante crea su registro o cambia
+ * de programa. Una cuenta sin rol no entra: la Dirección del Programa debe
+ * asignárselo.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -70,6 +72,12 @@ export default function SesionProveedor({ children }) {
 
   const limpiarAviso = useCallback(() => setEstado((e) => (e.aviso ? { ...e, aviso: null } : e)), [])
 
-  const valor = useMemo(() => ({ ...estado, salir, limpiarAviso }), [estado, salir, limpiarAviso])
+  /** Un token nuevo, con lo que el hook encuentre ahora en la cuenta: el programa y el registro de estudiante. */
+  const renovar = useCallback(async () => {
+    const { data, error } = await supabase.auth.refreshSession()
+    if (!error && data.session) setEstado((e) => ({ ...e, sesion: data.session, claims: leerClaims(data.session.access_token) }))
+  }, [])
+
+  const valor = useMemo(() => ({ ...estado, salir, limpiarAviso, renovar }), [estado, salir, limpiarAviso, renovar])
   return <SesionContexto.Provider value={valor}>{children}</SesionContexto.Provider>
 }

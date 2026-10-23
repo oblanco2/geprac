@@ -1,7 +1,7 @@
 /**
  * El cliente web de GEPRAC: las rutas de los tres roles con las pantallas de los
- * cinco casos de uso del prototipo funcional —CU-03, CU-06, CU-07, CU-08 y
- * CU-09— y los proveedores que comparten todas: la sesión, los avisos y la
+ * casos de uso que ya tienen pantalla —CU-01, CU-03, CU-05, CU-06, CU-07, CU-08
+ * y CU-09— y los proveedores que comparten todas: la sesión, los avisos y la
  * ventana de confirmación. Las direcciones van tras #, así el hospedaje estático
  * sirve cualquier pantalla y los botones atrás y adelante funcionan.
  *
@@ -15,6 +15,10 @@ import Protegida from './componentes/Protegida'
 import Inicio from './paginas/Inicio'
 import Ingreso from './paginas/Ingreso'
 import MisPracticas from './paginas/estudiante/MisPracticas'
+import MiPerfil from './paginas/estudiante/MiPerfil'
+import MiHojaVida from './paginas/estudiante/MiHojaVida'
+import Inscribir from './paginas/estudiante/Inscribir'
+import EstadoInscripcion from './paginas/estudiante/EstadoInscripcion'
 import MisFormatos from './paginas/estudiante/MisFormatos'
 import Bandeja from './paginas/tutor/Bandeja'
 import Revisar from './paginas/tutor/Revisar'
@@ -31,6 +35,10 @@ const rutas = createHashRouter([
     element: <Protegida roles={['ESTUDIANTE']} />,
     children: [
       { path: '/mis-practicas', element: <MisPracticas /> },                  // P-02 · CU-09
+      { path: '/mi-perfil', element: <MiPerfil /> },                          // P-03 · CU-01
+      { path: '/mi-hoja-de-vida', element: <MiHojaVida /> },                  // P-04 · CU-01
+      { path: '/inscribir/:paso?', element: <Inscribir /> },                  // P-05, P-06 y P-07 · CU-05
+      { path: '/mi-inscripcion', element: <EstadoInscripcion /> },            // P-08 · CU-05
       { path: '/mis-formatos', element: <MisFormatos /> },                    // P-09 · CU-08
       { path: '/mis-formatos/:id', element: <MisFormatos /> },
     ],
