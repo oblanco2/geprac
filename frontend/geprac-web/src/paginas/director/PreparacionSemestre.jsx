@@ -87,9 +87,12 @@ export default function PreparacionSemestre() {
     } catch (e) {
       if (Object.keys(e.campos).length) setErrores(e.campos)          // excepción 7.2: el código ya existe
       else {
-        // excepción 7.1: ya hay un semestre abierto; se informa cuál, y se cierra primero con la variación 2.2
+        // excepción 7.1: ya hay un semestre abierto; el servicio dice cuál y que se cierre primero con la variación 2.2.
+        // Su primera frase va en negrita, como en el prototipo: «No se abrió el semestre: el 2026-2 sigue abierto.»
         setNuevo(null)
-        setFallo({ negrita: 'No se abrió el semestre.', texto: e.mensaje })
+        const corte = e.mensaje.indexOf('. ')
+        setFallo(corte < 0 ? { negrita: e.mensaje, texto: '' }
+          : { negrita: e.mensaje.slice(0, corte + 1), texto: e.mensaje.slice(corte + 2) })
       }
       avisar('No se abrió el semestre: revise el mensaje de la pantalla.', 'err')
     } finally {
