@@ -14,6 +14,7 @@ import { useAvisar, useLimpiarAvisos, useSesion } from '../sesion/contexto'
 import { MENUS, PAPEL } from '../sesion/roles'
 import { iniciales } from '../lib/formato'
 import { Aviso } from './controles'
+import Pie from './Pie'
 
 export default function Marco({ titulo, ctx = '', menu, children }) {
   const { cuenta, salir } = useSesion()
@@ -83,10 +84,7 @@ export default function Marco({ titulo, ctx = '', menu, children }) {
             {llegada && <Aviso tipo={llegada.tipo} negrita={llegada.negrita}>{llegada.texto}</Aviso>}
             {children}
           </div>
-          <footer className="pie-app">
-            <span>© {new Date().getFullYear()} <b>GEPRAC</b> · Gestión de Prácticas Académicas</span>
-            <span>Universidad de Investigación y Desarrollo (UDI) · Todos los derechos reservados</span>
-          </footer>
+          <Pie />
         </div>
       </main>
     </div>

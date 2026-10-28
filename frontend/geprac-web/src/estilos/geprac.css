@@ -96,8 +96,6 @@ h3.sec{font-size:var(--t-s);text-transform:uppercase;letter-spacing:.6px;color:v
 [aria-invalid="true"]{border-color:var(--error)!important;background:var(--error-suave)!important}
 .obl{color:var(--error);font-weight:700;margin-left:3px}
 .leyenda{font-size:var(--t-xs);color:var(--tinta-3);margin:0 0 16px}
-.clave{display:flex;gap:8px;align-items:stretch}
-.clave input{flex:1}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:9px 16px;border-radius:var(--s);font:inherit;font-size:var(--t-s);font-weight:600;border:1px solid transparent;cursor:pointer;line-height:1.2;text-decoration:none;white-space:nowrap}
 .btn.ancho{width:100%}
@@ -227,12 +225,69 @@ details.detalle .lista{margin-bottom:12px}
 .btn.s .spin,.btn.g .spin{border-color:var(--linea);border-top-color:var(--marca)}
 @keyframes g{to{transform:rotate(360deg)}}
 
-.login{max-width:390px;margin:22px auto;padding:6px 0}
-.login .marca{text-align:center;margin-bottom:22px}
-.login .marca b{font-size:var(--t-xxl);letter-spacing:1.5px;color:var(--marca);display:block}
-.login .marca span{font-size:var(--t-xs);color:var(--tinta-3)}
-.login .campo{margin-bottom:14px}
-.login .olvido{text-align:center;margin:16px 0 0}
+/* ---------- P-01 inicio de sesión: la sede y el formulario ----------
+   Una columna en las pantallas angostas, con la sede como banda arriba; dos paneles en las anchas, con el arte de la
+   sede, los estudiantes y el lema a la izquierda —la imagen trae su diagonal y su franja— y el formulario a la derecha. */
+.ingreso{min-height:100vh;display:flex;flex-direction:column;background:var(--fondo)}
+.ingreso-cuerpo{flex:1;display:flex;flex-direction:column;min-height:0}
+.ingreso-arte{position:relative;height:190px;overflow:hidden;clip-path:polygon(0 0,100% 0,100% 74%,0 100%)}
+.ingreso-arte picture{display:contents}
+.ingreso-arte img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 60%}
+.ingreso-arte::before{content:"";position:absolute;inset:0;background:linear-gradient(200deg,rgba(11,79,138,0) 35%,rgba(11,79,138,.62) 100%)}
+.ingreso-arte::after{content:"";position:absolute;left:-40px;top:-30px;width:150px;height:26px;background:rgba(11,79,138,.85);transform:rotate(-38deg);box-shadow:0 22px 0 rgba(232,241,249,.35)}
+.ingreso-panel{flex:1;display:flex;justify-content:center;align-items:flex-start;padding:22px 18px 34px}
+.ingreso-contenido{width:100%;max-width:470px}
+.ingreso-logo{display:block;width:min(100%,330px);height:auto;margin:0 auto 22px}
+.ingreso-tit{font-size:var(--t-xxl);font-weight:700;color:var(--marca);margin:0 0 18px;line-height:1.25}
+.ingreso-tit:focus{outline:none}
+.ingreso .campo{margin-bottom:18px}
+.ingreso .campo label{font-size:var(--t-l);font-weight:400;color:var(--tinta-2);margin-bottom:8px}
+.grupo-ic{display:flex;align-items:stretch;border:1px solid var(--tinta-3);border-radius:var(--s);background:var(--marca-suave);overflow:hidden}
+.grupo-ic:focus-within{outline:2px solid var(--marca);outline-offset:1px;border-color:var(--marca)}
+.grupo-ic:has([aria-invalid="true"]){border-color:var(--error);background:var(--error-suave)}
+.grupo-ic .ic{flex:0 0 50px;display:grid;place-items:center;color:var(--marca);border-right:1px solid var(--linea)}
+.grupo-ic svg{width:20px;height:20px;display:block}
+.campo .grupo-ic input{flex:1;min-width:0;border:none;border-radius:0;background:transparent;min-height:50px;padding:10px 14px;font-size:var(--t-l)}
+.campo .grupo-ic input:focus{outline:none}
+.grupo-ic .ver{flex:0 0 50px;display:grid;place-items:center;border:none;background:transparent;color:var(--tinta-2);cursor:pointer;padding:0}
+.grupo-ic .ver:hover{color:var(--marca)}
+.grupo-ic .ver:focus-visible{outline:2px solid var(--marca);outline-offset:-5px;border-radius:var(--s)}
+.ingreso .btn.p{min-height:50px;font-size:var(--t-l);font-weight:700;margin-top:6px}
+.ingreso .olvido{text-align:center;margin:22px 0 0}
+.ingreso .olvido .acc{font-size:var(--t-l);font-weight:400}
+.ingreso .pie-app{background:var(--marca-suave);font-size:var(--t-s);padding:18px 40px}
+@media(min-width:1000px) and (min-aspect-ratio:7/5) and (min-height:500px){
+  .ingreso{height:100vh;min-height:0}
+  .ingreso-cuerpo{flex-direction:row}
+  .ingreso-arte{flex:0 0 auto;height:auto;clip-path:none}
+  .ingreso-arte::before,.ingreso-arte::after{content:none}
+  .ingreso-arte img{width:auto;max-width:calc(100vw - 440px);object-fit:cover;object-position:right bottom}
+  /* el formulario se centra en lo alto; si no cabe, empieza arriba y el panel se desplaza, sin saltos al aparecer un aviso */
+  .ingreso-panel{min-width:0;overflow-y:auto;overflow-anchor:none;flex-direction:column;justify-content:flex-start;align-items:center;
+    padding:clamp(14px,3.5vh,28px) 64px clamp(14px,3.5vh,28px) 28px}
+  .ingreso-contenido{max-width:600px;margin-block:auto}
+  /* las medidas siguen la altura de la ventana: así cabe también en los portátiles con la escala de Windows al 125 % */
+  .ingreso-logo{width:min(100%,460px,44vh);margin-bottom:clamp(12px,3.4vh,34px)}
+  .ingreso-tit{font-size:calc(var(--t-xxl) * 1.25);margin-bottom:clamp(10px,2.4vh,22px)}
+  .ingreso .aviso{margin-bottom:clamp(10px,2vh,18px);padding-block:clamp(9px,1.6vh,13px)}
+  .ingreso .campo{margin-bottom:clamp(10px,2.2vh,18px)}
+  .ingreso .campo label{margin-bottom:clamp(4px,.9vh,8px)}
+  .grupo-ic .ic,.grupo-ic .ver{flex-basis:56px}
+  .campo .grupo-ic input,.ingreso .btn.p{min-height:clamp(44px,6.4vh,56px)}
+  .ingreso .olvido{margin-top:clamp(10px,2.4vh,22px)}
+  .ingreso .pie-app{padding:clamp(10px,2vh,18px) 40px}
+}
+@media(min-width:1000px) and (min-aspect-ratio:7/5) and (min-height:500px) and (max-height:749px){
+  .ingreso-tit{font-size:var(--t-xxl)}
+}
+/* las ventanas más bajas, como 1366 x 768 al 125 % con las barras del navegador: todo se aprieta para que quepa el aviso */
+@media(min-width:1000px) and (min-aspect-ratio:7/5) and (min-height:500px) and (max-height:599px){
+  .ingreso-panel{padding-block:12px}
+  .ingreso-logo{width:min(100%,360px,32vh);margin-bottom:12px}
+  .ingreso-tit{margin-bottom:10px}
+  .ingreso .campo{margin-bottom:10px}
+  .ingreso .pie-app{padding-block:8px}
+}
 
 .semestre-nuevo{border:1px solid var(--linea);border-radius:var(--r);padding:16px;margin-top:14px;background:var(--fondo)}
 .semestre-nuevo h4{margin:0 0 12px;font-size:var(--t-s)}
@@ -319,4 +374,5 @@ details.detalle .lista{margin-bottom:12px}
   .barra{padding:12px 16px}
   .filtros.compactos .campo{flex:1 1 100%}
   .pie-app{flex-direction:column;align-items:flex-start;padding:12px 16px}
+  .ingreso .pie-app{padding:12px 16px}
 }
