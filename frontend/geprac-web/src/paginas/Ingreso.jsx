@@ -24,7 +24,7 @@ import logo from '../imagenes/geprac-logo.webp'
 
 const OBLIGATORIO = 'Este dato es obligatorio.'
 /** La composición de dos paneles; por debajo, la de una columna con la banda de la sede. */
-const ANCHA = '(min-width: 1000px) and (min-aspect-ratio: 7/5)'
+const ANCHA = '(min-width: 1000px) and (min-aspect-ratio: 7/5) and (min-height: 500px)'
 
 /** Los iconos de los campos: decorativos, del color de la marca. */
 const icono = (trazo) => (
