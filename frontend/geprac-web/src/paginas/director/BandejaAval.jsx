@@ -60,7 +60,7 @@ export default function BandejaAval() {
           onChange={(e) => setFiltro((f) => ({ ...f, institucion: e.target.value }))} />
         <Seleccion etiqueta="Estado" opciones={ESTADOS_AVAL} vacia="Todos" value={filtro.estado}
           onChange={(e) => setFiltro((f) => ({ ...f, estado: e.target.value }))} />
-        <span className="empuja"><span className="pill">{n} por avalar</span></span>
+        <span className="empuja"><span className={n ? 'pill atencion' : 'pill'}>{n} por avalar</span></span>
       </div>
       <Tabla titulo="Inscripciones aprobadas por el tutor académico" columnas={COLUMNAS}
         vacio={todas.length ? undefined : 'No hay inscripciones aprobadas por el tutor académico pendientes de aval.'}
