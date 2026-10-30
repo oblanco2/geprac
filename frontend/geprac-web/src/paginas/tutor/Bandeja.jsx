@@ -63,7 +63,7 @@ export default function Bandeja() {
           onChange={(e) => setFiltro((f) => ({ ...f, institucion: e.target.value }))} />
         <Seleccion etiqueta="Estado" opciones={ESTADOS_BANDEJA} vacia="Todos" value={filtro.estado}
           onChange={(e) => setFiltro((f) => ({ ...f, estado: e.target.value }))} />
-        <span className="empuja"><span className="pill">{n} {n === 1 ? 'pendiente' : 'pendientes'}</span></span>
+        <span className="empuja"><span className={n ? 'pill atencion' : 'pill'}>{n} {n === 1 ? 'pendiente' : 'pendientes'}</span></span>
       </div>
       <Tabla titulo="Inscripciones de las prácticas designadas" columnas={COLUMNAS}
         vacio={estado.sinDesignacion ? 'La bandeja está vacía: no tiene prácticas designadas en el semestre.'
