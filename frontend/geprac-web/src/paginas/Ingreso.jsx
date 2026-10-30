@@ -111,7 +111,7 @@ export default function Ingreso() {
               <Campo id="login-clave" etiqueta="Contraseña" error={errores.clave}>
                 <div className="grupo-ic">
                   <span className="ic">{CANDADO}</span>
-                  <input type={ver ? 'text' : 'password'} id="login-clave" autoComplete="current-password" placeholder="Ingrese su contraseña"
+                  <input type={ver ? 'text' : 'password'} id="login-clave" autoComplete="current-password" placeholder="ingrese su contraseña"
                     aria-required="true" aria-invalid={errores.clave ? true : undefined}
                     aria-describedby={errores.clave ? 'login-clave-er' : undefined}
                     value={clave} onChange={(e) => setClave(e.target.value)} />
