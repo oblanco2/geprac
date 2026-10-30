@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  * únicamente cuando la inscripción está avalada.
  *
  * Los cuatro se diligencian antes de registrar la emisión: si uno no se puede
- * generar, no queda una emisión parcial (RNF-08). Cada emisión guarda su
+ * generar, no queda una emisión parcial. Cada emisión guarda su
  * plantilla y su fecha; con ellas y con la copia de la inscripción, que después
  * del aval ya no cambia, la descarga entrega el documento tal como se emitió.
  *

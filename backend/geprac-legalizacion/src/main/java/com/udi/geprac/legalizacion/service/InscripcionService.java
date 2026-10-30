@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
  * posterior del perfil o del catálogo no altera lo ya inscrito.
  *
  * El estudiante solo opera sus propias inscripciones: su registro sale de
- * MS-01 o del token, nunca de un dato de la petición (RNF-06).
+ * MS-01 o del token, nunca de un dato de la petición.
  *
  * @author Darien Asdrwal Pesca Ojeda
  */
