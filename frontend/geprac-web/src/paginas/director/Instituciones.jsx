@@ -1,7 +1,9 @@
 /**
  * P-14 · Instituciones receptoras (CU-03, RF-05). El catálogo de escenarios de
- * práctica, con buscador y filtros de ciudad y estado; de él escoge el
- * estudiante en el primer paso de su inscripción. Una institución con
+ * práctica, con buscador y filtros de ciudad y estado —el de estado se repite
+ * al pie de la tabla, con el número de instituciones de cada uno, junto a la
+ * paginación—; de él escoge el estudiante en el primer paso de su
+ * inscripción. Una institución con
  * inscripciones no se elimina: se marca inactiva para retirarla de la
  * selección (variación 2.2).
  *
@@ -11,11 +13,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { actualizarInstitucion, eliminarInstitucion, listarInstituciones } from '../../api/legalizacion'
 import { useAvisar, useConfirmar } from '../../sesion/contexto'
-import { normal } from '../../lib/formato'
+import { contarPor, normal } from '../../lib/formato'
 import Marco from '../../componentes/Marco'
-import { Aviso, Boton, Cargando, Entrada, Estado, NotaFiltros, Seleccion, Tabla } from '../../componentes/controles'
+import { Aviso, Boton, Cargando, Entrada, Estado, NotaFiltros, Seleccion, TablaPaginada } from '../../componentes/controles'
 
 const COLUMNAS = [{ l: 'Razón social' }, { l: 'NIT', w: 'l' }, { l: 'Ciudad', w: 'm' }, { l: 'Contactos', w: 's' }, { l: 'Estado', w: 's' }, { l: '', w: 'l' }]
+const ESTADOS_CATALOGO = [['activa', 'Activa'], ['inactiva', 'Inactiva']]
+const BOTONES = [['activa', 'Activas'], ['inactiva', 'Inactivas']]
 
 export default function Instituciones() {
   const navigate = useNavigate()
@@ -65,24 +69,27 @@ export default function Instituciones() {
   const buscar = normal(filtro.buscar)
   const ciudades = [...new Set(estado.instituciones.map((i) => i.ciudad).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, 'es')).map((c) => [c, c])
-  const visibles = estado.instituciones.filter((i) => (!buscar || normal(`${i.razonSocial} ${i.nit || ''}`).includes(buscar))
-    && (!filtro.ciudad || i.ciudad === filtro.ciudad)
-    && (!filtro.estado || (filtro.estado === 'activa') === i.activa))
+  const base = estado.instituciones.filter((i) => (!buscar || normal(`${i.razonSocial} ${i.nit || ''}`).includes(buscar))
+    && (!filtro.ciudad || i.ciudad === filtro.ciudad))
+  const visibles = base.filter((i) => !filtro.estado || (filtro.estado === 'activa') === i.activa)
   return marco(
     <>
       <NotaFiltros>
-        Puede buscar por <b>nombre</b> o <b>NIT</b>, y filtrar por <b>ciudad</b> y <b>estado</b>.
+        Puede buscar por <b>nombre</b> o <b>NIT</b>, y filtrar por <b>ciudad</b> y <b>estado</b>. El estado también se escoge con los botones
+        al pie de la tabla, que dicen cuántas hay de cada uno.
       </NotaFiltros>
       <div className="filtros">
         <Entrada etiqueta="Buscar por nombre o NIT" tipo="search" placeholder="Ej.: Las Américas o 890.205" value={filtro.buscar}
           onChange={(e) => setFiltro((f) => ({ ...f, buscar: e.target.value }))} />
         <Seleccion etiqueta="Ciudad" opciones={ciudades} vacia="Todas" value={filtro.ciudad}
           onChange={(e) => setFiltro((f) => ({ ...f, ciudad: e.target.value }))} />
-        <Seleccion etiqueta="Estado" opciones={[['activa', 'Activa'], ['inactiva', 'Inactiva']]} vacia="Todas" value={filtro.estado}
+        <Seleccion etiqueta="Estado" opciones={ESTADOS_CATALOGO} vacia="Todas" value={filtro.estado}
           onChange={(e) => setFiltro((f) => ({ ...f, estado: e.target.value }))} />
         <span className="empuja"><Boton tipo="p" onClick={() => navigate('/instituciones/nueva')}>Nueva institución</Boton></span>
       </div>
-      <Tabla titulo="Catálogo de instituciones receptoras" columnas={COLUMNAS}
+      <TablaPaginada titulo="Catálogo de instituciones receptoras" columnas={COLUMNAS} firma={JSON.stringify(filtro)}
+        estados={BOTONES} conteos={contarPor(base, (i) => (i.activa ? 'activa' : 'inactiva'))} total={base.length}
+        estado={filtro.estado} alCambiarEstado={(e) => setFiltro((f) => ({ ...f, estado: e }))}
         vacio={estado.instituciones.length ? undefined : 'El catálogo todavía no tiene instituciones.'}
         filas={visibles.map((i) => ({ clave: i.id, celdas: [
           <b key="r">{i.razonSocial}</b>, i.nit || <span key="n" className="sub">No registra</span>, i.ciudad, i.contactos.length,

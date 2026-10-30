@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  * rol, el programa que dirige o en el que estudia y el identificador de su
  * registro de estudiante. Los añade al token el hook de MS-01, de modo que
  * MS-02 autoriza sin consultar a MS-01 y el alcance nunca sale de un dato que
- * el usuario envíe en la petición (RNF-06).
+ * el usuario envíe en la petición.
  *
  * @author Darien Asdrwal Pesca Ojeda
  */

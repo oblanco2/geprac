@@ -19,6 +19,12 @@ export const ESTADOS = {
   avalada: { texto: 'Avalada', sentido: 'sus formatos ya se pueden emitir' },
 }
 
+/** Cuántos elementos de la lista hay de cada valor que devuelve clave: { valor: n }. */
+export const contarPor = (lista, clave) => lista.reduce((c, x) => ({ ...c, [clave(x)]: (c[clave(x)] || 0) + 1 }), {})
+
+/** Los estados en plural, para los botones del filtro por estado al pie de las tablas. */
+export const PLURALES = { BORRADOR: 'En borrador', ENVIADA: 'Enviadas', APROBADA: 'Aprobadas', DEVUELTA: 'Devueltas', AVALADA: 'Avaladas' }
+
 /** Las opciones de un filtro por estado, [valor, texto], en el orden de ESTADOS. */
 export const opcionesEstado = (claves = Object.keys(ESTADOS)) => claves.map((k) => [k.toUpperCase(), ESTADOS[k].texto])
 

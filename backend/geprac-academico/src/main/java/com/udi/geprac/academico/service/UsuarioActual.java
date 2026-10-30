@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 /**
  * Lo que el token de la petición en curso dice de quien la hace. El alcance de
  * cada operación sale de aquí y nunca de un dato que el usuario envíe en la
- * petición (RNF-06).
+ * petición.
  *
  * @author Oscar Iván Blanco Díaz
  */

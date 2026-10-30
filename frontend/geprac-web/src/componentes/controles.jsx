@@ -3,11 +3,13 @@
  * estructura del prototipo de alta fidelidad: cada campo con su etiqueta
  * asociada, su ayuda y su mensaje de error enlazados por aria-describedby, el
  * asterisco de lo obligatorio, los avisos que no dependen solo del color y las
- * tablas que en el celular se presentan como tarjetas.
+ * tablas que en el celular se presentan como tarjetas; las de las bandejas, los
+ * historiales y los catálogos, con un máximo de filas por página y el filtro por
+ * estado al pie.
  *
  * @author José Fernando Rincón Barrios
  */
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { ESTADOS } from '../lib/formato'
 
 const describir = (id, ayuda, error) => [ayuda && `${id}-ay`, error && `${id}-er`].filter(Boolean).join(' ') || undefined
@@ -71,7 +73,7 @@ export function Area({ etiqueta, obl, ayuda, error, clase, maxlen, largo = 0, re
   )
 }
 
-/** Dato que el usuario no puede modificar (RNF-02). */
+/** Dato que el usuario no puede modificar: se presenta en modo de solo lectura. */
 export function Lectura({ etiqueta, valor, tipo = 'text', clase }) {
   const id = useId()
   return (
@@ -177,6 +179,71 @@ export function Tabla({ columnas, filas, titulo, vacio = 'Ninguna fila coincide 
         </tbody>
       </table>
     </div>
+  )
+}
+
+/** Máximo de filas por página en las tablas de las bandejas, los historiales y los catálogos. */
+export const FILAS_POR_PAGINA = 5
+
+/** Los números de página que se muestran: todas si son pocas; si no, la primera, la última y las vecinas de la actual. */
+function numeros(total, actual) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const lista = [1]
+  for (let n = Math.max(2, actual - 1); n <= Math.min(total - 1, actual + 1); n++) lista.push(n)
+  lista.push(total)
+  return lista.flatMap((n, i) => (i && n - lista[i - 1] > 1 ? ['…', n] : [n]))
+}
+
+/** Tabla con un máximo de filas por página y, al pie, el filtro por estado —con el número de filas de cada uno— y la
+    paginación. filas: las que dejan todos los filtros · estados: [[valor, texto]] · conteos: { valor: filas de ese estado
+    con los demás filtros } · total: las filas con los demás filtros · estado y alCambiarEstado: el mismo filtro que la
+    lista «Estado» de arriba · firma: los filtros aplicados; cuando cambian, la tabla vuelve a la primera página. */
+export function TablaPaginada({ filas, estados, conteos, total, estado, alCambiarEstado, firma, porPagina = FILAS_POR_PAGINA,
+  textoTodos = 'Todas', ...resto }) {
+  const [vista, setVista] = useState({ firma, pagina: 1 })
+  const paginas = Math.max(1, Math.ceil(filas.length / porPagina))
+  const pagina = vista.firma === firma ? Math.min(vista.pagina, paginas) : 1
+  const ir = (n) => setVista({ firma, pagina: n })
+  const desde = (pagina - 1) * porPagina
+  const hasta = Math.min(desde + porPagina, filas.length)
+  const boton = (valor, texto, n) => (
+    <button type="button" key={valor || 'todos'} className={`chip${valor ? ` ${valor.toLowerCase()}` : ''}`}
+      aria-pressed={(estado || '') === valor} onClick={() => alCambiarEstado(valor)}>
+      {texto}<span className="n">{n}</span>
+    </button>
+  )
+  return (
+    <>
+      <Tabla filas={filas.slice(desde, hasta)} {...resto} />
+      <div className="pie-tabla">
+        {estados && (
+          <div className="filtro-estado" role="group" aria-label="Filtrar por estado">
+            <span className="rot" aria-hidden="true">Estado</span>
+            {boton('', textoTodos, total)}
+            {estados.map(([valor, texto]) => boton(valor, texto, conteos[valor] || 0))}
+          </div>
+        )}
+        <nav className="paginacion" aria-label="Páginas de la tabla">
+          <span className="rango" aria-live="polite">
+            {filas.length ? `Mostrando ${desde + 1}–${hasta} de ${filas.length}` : 'Ninguna fila para mostrar'}
+          </span>
+          {paginas > 1 && (
+            <span className="pags">
+              <button type="button" className="pag" disabled={pagina === 1} onClick={() => ir(pagina - 1)}>
+                <span aria-hidden="true">‹ </span>Anterior
+              </button>
+              {numeros(paginas, pagina).map((n, i) => (n === '…'
+                ? <span key={`e${i}`} className="elipsis" aria-hidden="true">…</span>
+                : <button type="button" key={n} className="pag num-pag" aria-current={n === pagina ? 'page' : undefined}
+                  aria-label={`Página ${n}`} onClick={() => ir(n)}>{n}</button>))}
+              <button type="button" className="pag" disabled={pagina === paginas} onClick={() => ir(pagina + 1)}>
+                Siguiente<span aria-hidden="true"> ›</span>
+              </button>
+            </span>
+          )}
+        </nav>
+      </div>
+    </>
   )
 }
 

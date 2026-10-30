@@ -222,7 +222,7 @@ export default function PreparacionSemestre() {
             <div className="filtros">
               <Entrada etiqueta="Buscar usuario" tipo="search" placeholder="Nombre o correo" value={buscar} disabled={!!abiertas.roles}
                 onChange={(e) => setBuscar(e.target.value)} />
-              <span className="empuja"><span className="pill">{sinRol} {sinRol === 1 ? 'cuenta sin rol' : 'cuentas sin rol'}</span></span>
+              <span className="empuja"><span className={sinRol ? 'pill atencion' : 'pill'}>{sinRol} {sinRol === 1 ? 'cuenta sin rol' : 'cuentas sin rol'}</span></span>
             </div>
           </>
         )} />
