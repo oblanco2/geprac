@@ -102,7 +102,7 @@ export default function Ingreso() {
               <Campo id="login-correo" etiqueta="Correo institucional" error={errores.correo}>
                 <div className="grupo-ic">
                   <span className="ic">{SOBRE}</span>
-                  <input type="email" id="login-correo" autoComplete="username" placeholder="nombre.apellido@udi.edu.co"
+                  <input type="email" id="login-correo" autoComplete="username" placeholder="usuario@udi.edu.co"
                     aria-required="true" aria-invalid={errores.correo ? true : undefined}
                     aria-describedby={errores.correo ? 'login-correo-er' : undefined}
                     value={correo} onChange={(e) => setCorreo(e.target.value)} />
@@ -111,7 +111,7 @@ export default function Ingreso() {
               <Campo id="login-clave" etiqueta="Contraseña" error={errores.clave}>
                 <div className="grupo-ic">
                   <span className="ic">{CANDADO}</span>
-                  <input type={ver ? 'text' : 'password'} id="login-clave" autoComplete="current-password"
+                  <input type={ver ? 'text' : 'password'} id="login-clave" autoComplete="current-password" placeholder="Ingrese su contraseña"
                     aria-required="true" aria-invalid={errores.clave ? true : undefined}
                     aria-describedby={errores.clave ? 'login-clave-er' : undefined}
                     value={clave} onChange={(e) => setClave(e.target.value)} />
