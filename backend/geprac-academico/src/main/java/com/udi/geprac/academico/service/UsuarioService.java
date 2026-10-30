@@ -57,7 +57,7 @@ public class UsuarioService {
     /**
      * CU-04, variación 2.1: la Dirección asigna el rol de una cuenta. Al rol de
      * director lo acompaña el programa, que solo puede ser el de quien asigna,
-     * porque cada director opera sobre su programa (RNF-06); con los demás
+     * porque cada director opera sobre su programa; con los demás
      * roles la cuenta queda sin programa. El director no puede quitarse su
      * propio rol: el programa quedaría sin quien asigne los roles.
      *
