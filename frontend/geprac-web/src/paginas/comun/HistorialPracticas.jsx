@@ -1,7 +1,8 @@
 /**
  * P-19 · Historial del programa o de mis prácticas (CU-09, RF-15). La consulta
  * por estudiante, práctica, institución, semestre y estado, con el estado de
- * cada inscripción y el resumen por estado con sus mismos colores. Es el mismo
+ * cada inscripción y, al pie de la tabla, el resumen por estado con sus mismos
+ * colores, que también filtra, junto a la paginación. Es el mismo
  * caso de uso con el alcance de cada rol: la Dirección ve todas las
  * inscripciones de su programa y el tutor las de las prácticas que tuvo
  * designadas. Ningún filtro amplía ese alcance, porque lo fija el servicio.
@@ -12,15 +13,13 @@
 import { useEffect, useState } from 'react'
 import { consultarHistorial } from '../../api/legalizacion'
 import { useAvisar, useSesion } from '../../sesion/contexto'
-import { ESTADOS, fecha, normal, opcionesEstado } from '../../lib/formato'
+import { ESTADOS, PLURALES, contarPor, fecha, normal, opcionesEstado } from '../../lib/formato'
 import { guardarArchivo } from '../../lib/descarga'
 import { useNombrePrograma } from '../../lib/programa'
 import Marco from '../../componentes/Marco'
-import { Aviso, Boton, Cargando, Entrada, Estado, NotaFiltros, Seleccion, Tabla } from '../../componentes/controles'
+import { Aviso, Boton, Cargando, Entrada, Estado, NotaFiltros, Seleccion, TablaPaginada } from '../../componentes/controles'
 
 const COLUMNAS = [{ l: 'Estudiante' }, { l: 'Semestre', w: 's' }, { l: 'Práctica', w: 's' }, { l: 'Institución' }, { l: 'Estado', w: 'm' }, { l: 'Avalada', w: 'm' }]
-const PLURAL = { AVALADA: ['avalada', 'avaladas'], APROBADA: ['aprobada', 'aprobadas'], ENVIADA: ['enviada', 'enviadas'],
-  DEVUELTA: ['devuelta', 'devueltas'], BORRADOR: ['en borrador', 'en borrador'] }
 
 export default function HistorialPracticas() {
   const { cuenta, claims } = useSesion()
@@ -53,14 +52,12 @@ export default function HistorialPracticas() {
   // el tutor no ve borradores: su historial solo trae inscripciones enviadas
   const estados = opcionesEstado(Object.keys(ESTADOS).filter((k) => !tutor || k !== 'borrador'))
   const texto = normal(filtro.buscar)
-  const visibles = todas.filter((h) => (!filtro.semestre || h.semestre === filtro.semestre)
+  const base = todas.filter((h) => (!filtro.semestre || h.semestre === filtro.semestre)
     && (!filtro.practica || String(h.ordenPractica) === filtro.practica)
     && (!filtro.institucion || h.institucion === filtro.institucion)
-    && (!filtro.estado || h.estado === filtro.estado)
     && (!texto || normal(`${h.estudiante} ${h.documento} ${h.documento.replace(/\D/g, '')}`).includes(texto)))
-
+  const visibles = base.filter((h) => !filtro.estado || h.estado === filtro.estado)
   const n = visibles.length
-  const partes = Object.keys(PLURAL).map((k) => [k, visibles.filter((h) => h.estado === k).length]).filter(([, x]) => x)
 
   const exportar = () => {
     const celda = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
@@ -78,6 +75,7 @@ export default function HistorialPracticas() {
       )}
       <NotaFiltros>
         Puede filtrar por <b>semestre</b>, <b>práctica</b>, <b>institución</b> y <b>estado</b>, y buscar un estudiante por su <b>nombre</b> o su <b>documento</b>.
+        El estado también se escoge con los botones al pie de la tabla, que dicen cuántas hay de cada uno.
       </NotaFiltros>
       <div className="filtros compactos">
         <Seleccion etiqueta="Semestre" opciones={semestres} vacia="Todos" value={filtro.semestre}
@@ -92,7 +90,9 @@ export default function HistorialPracticas() {
           onChange={(e) => setFiltro((f) => ({ ...f, buscar: e.target.value }))} />
         <span className="empuja"><Boton tipo="s" disabled={!n} onClick={exportar}>Exportar historial</Boton></span>
       </div>
-      <Tabla titulo="Historial de inscripciones" columnas={COLUMNAS}
+      <TablaPaginada titulo="Historial de inscripciones" columnas={COLUMNAS} firma={JSON.stringify(filtro)}
+        estados={estados.map(([k]) => [k, PLURALES[k]])} conteos={contarPor(base, (h) => h.estado)} total={base.length}
+        estado={filtro.estado} alCambiarEstado={(e) => setFiltro((f) => ({ ...f, estado: e }))}
         vacio={todas.length ? undefined : tutor ? 'Todavía no hay inscripciones enviadas de las prácticas que tiene designadas.'
           : 'Todavía no hay inscripciones en el programa.'}
         filas={visibles.map((h) => ({ clave: h.inscripcionId, celdas: [
@@ -100,10 +100,6 @@ export default function HistorialPracticas() {
           h.semestre, <span key="p" className="num">{h.ordenPractica}</span>, h.institucion || '—',
           <Estado key="s" estado={h.estado} />, h.avaladaEn ? fecha(h.avaladaEn) : '—',
         ] }))} />
-      <p className="resumen-estados conteo" aria-live="polite">
-        <span className="total">{n} {n === 1 ? 'inscripción' : 'inscripciones'}</span>
-        {partes.map(([k, x]) => <span key={k} className={`et ${k.toLowerCase()}`}>{x} {PLURAL[k][x === 1 ? 0 : 1]}</span>)}
-      </p>
     </>,
   )
 }

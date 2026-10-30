@@ -2,21 +2,24 @@
  * P-10 · Bandeja de revisión (CU-06, RF-11). Las inscripciones de las prácticas
  * que el tutor tiene designadas en el semestre abierto, de la que lleva más
  * tiempo esperando a la más reciente, con el número de pendientes (variación
- * 2.1) y sus filtros por práctica, institución y estado. Abre con las enviadas,
- * las que esperan su revisión; las demás se consultan sin modificarlas. Ningún
- * filtro amplía el alcance: lo fijan las designaciones.
+ * 2.1) y sus filtros por práctica, institución y estado; el de estado se repite
+ * al pie de la tabla, con el número de inscripciones de cada uno, junto a la
+ * paginación. Abre con las enviadas, las que esperan su revisión; las demás se
+ * consultan sin modificarlas. Ningún filtro amplía el alcance: lo fijan las
+ * designaciones.
  *
  * @author José Fernando Rincón Barrios
  */
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { listarBandeja } from '../../api/legalizacion'
-import { fecha, opcionesEstado } from '../../lib/formato'
+import { PLURALES, contarPor, fecha, opcionesEstado } from '../../lib/formato'
 import Marco from '../../componentes/Marco'
-import { Aviso, Cargando, Estado, NotaFiltros, Seleccion, Tabla } from '../../componentes/controles'
+import { Aviso, Cargando, Estado, NotaFiltros, Seleccion, TablaPaginada } from '../../componentes/controles'
 
 const COLUMNAS = [{ l: 'Estudiante' }, { l: 'Práctica' }, { l: 'Institución' }, { l: 'Enviada', w: 'm' }, { l: 'Estado', w: 'm' }, { l: '', w: 's' }]
 const ESTADOS_BANDEJA = opcionesEstado(['enviada', 'aprobada', 'devuelta', 'avalada'])
+const BOTONES = ESTADOS_BANDEJA.map(([k]) => [k, PLURALES[k]])
 const nombre = (i) => `${i.datos.nombres} ${i.datos.apellidos}`
 const practica = (i) => `${i.ordenPractica} · ${i.datos.nombrePractica}`
 
@@ -43,9 +46,9 @@ export default function Bandeja() {
   const todas = estado.inscripciones
   const practicas = [...new Map(todas.map((i) => [String(i.practicaId), practica(i)])).entries()]
   const instituciones = [...new Set(todas.map((i) => i.datos.institucionRazonSocial).filter(Boolean))].sort().map((n) => [n, n])
-  const visibles = todas.filter((i) => (!filtro.practica || String(i.practicaId) === filtro.practica)
-    && (!filtro.institucion || i.datos.institucionRazonSocial === filtro.institucion)
-    && (!filtro.estado || i.estado === filtro.estado))
+  const base = todas.filter((i) => (!filtro.practica || String(i.practicaId) === filtro.practica)
+    && (!filtro.institucion || i.datos.institucionRazonSocial === filtro.institucion))
+  const visibles = base.filter((i) => !filtro.estado || i.estado === filtro.estado)
   const n = todas.filter((i) => i.estado === 'ENVIADA').length
 
   return marco(
@@ -54,7 +57,8 @@ export default function Bandeja() {
         <Aviso tipo="info" negrita={estado.sinDesignacion}>Su bandeja se llena cuando le designe una.</Aviso>
       )}
       <NotaFiltros>
-        Puede filtrar por <b>práctica</b>, <b>institución</b> y <b>estado</b>. La bandeja abre con las enviadas, que son las que esperan su revisión.
+        Puede filtrar por <b>práctica</b>, <b>institución</b> y <b>estado</b>; el estado, también con los botones al pie de la tabla,
+        que dicen cuántas hay de cada uno. La bandeja abre con las enviadas, que son las que esperan su revisión.
       </NotaFiltros>
       <div className="filtros">
         <Seleccion etiqueta="Práctica" opciones={practicas} vacia="Todas las asignadas" value={filtro.practica}
@@ -65,7 +69,9 @@ export default function Bandeja() {
           onChange={(e) => setFiltro((f) => ({ ...f, estado: e.target.value }))} />
         <span className="empuja"><span className={n ? 'pill atencion' : 'pill'}>{n} {n === 1 ? 'pendiente' : 'pendientes'}</span></span>
       </div>
-      <Tabla titulo="Inscripciones de las prácticas designadas" columnas={COLUMNAS}
+      <TablaPaginada titulo="Inscripciones de las prácticas designadas" columnas={COLUMNAS} firma={JSON.stringify(filtro)}
+        estados={BOTONES} conteos={contarPor(base, (i) => i.estado)} total={base.length} estado={filtro.estado}
+        alCambiarEstado={(e) => setFiltro((f) => ({ ...f, estado: e }))}
         vacio={estado.sinDesignacion ? 'La bandeja está vacía: no tiene prácticas designadas en el semestre.'
           : !todas.length || (!n && filtro.estado === 'ENVIADA') ? 'No tiene inscripciones pendientes de revisión.' : undefined}
         filas={visibles.map((i) => {
