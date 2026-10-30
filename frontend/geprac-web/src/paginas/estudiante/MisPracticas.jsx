@@ -89,7 +89,7 @@ export default function MisPracticas() {
           }
           return (
             <li key={h.ordenPractica}>
-              <div className="tarj en-curso">
+              <div className="tarj">
                 {cab}<Estado estado={h.estado} />
                 <span className="sem">Semestre {h.semestre} · {h.institucion || 'sin institución'}</span>
                 <span className="sem">{periodo(h.fechaInicio, h.fechaFin)}</span>
