@@ -334,20 +334,21 @@ details.pregunta[open] summary{color:var(--marca);border-radius:var(--r) var(--r
 @media(min-width:1000px) and (min-aspect-ratio:7/5) and (min-height:500px) and (max-height:749px){
   .ingreso-tit{font-size:var(--t-xxl)}
   .ingreso-panel{padding-block:clamp(12px,2.6vh,20px)}
-  .ingreso-logo{width:min(100%,400px,36vh);margin-bottom:clamp(10px,2.6vh,20px)}
+  .ingreso-logo{width:min(100%,400px,31vh);margin-bottom:clamp(10px,2.6vh,20px)}
   .ingreso .campo{margin-bottom:clamp(8px,1.9vh,14px)}
   .ingreso .olvido{margin-top:clamp(8px,1.9vh,14px)}
+  .ingreso .pie-app{font-size:var(--t-xs);padding-block:clamp(8px,1.4vh,12px)}
 }
 /* las más bajas, como 1366 x 768 al 125 % con las barras del navegador: todo se aprieta para que quepa el aviso */
 @media(min-width:1000px) and (min-aspect-ratio:7/5) and (min-height:500px) and (max-height:599px){
   .ingreso-panel{padding-block:10px}
-  .ingreso-logo{width:min(100%,320px,24vh);margin-bottom:10px}
+  .ingreso-logo{width:min(100%,320px,19vh);margin-bottom:8px}
   .ingreso-tit{margin-bottom:8px}
   .ingreso-tit::after{margin-top:5px}
   .ingreso .campo{margin-bottom:6px}
   .ingreso .campo label{font-size:var(--t-m);margin-bottom:3px}
   .ingreso .olvido{margin-top:6px}
-  .ingreso .pie-app{padding-block:8px}
+  .ingreso .pie-app{padding-block:6px}
 }
 
 .semestre-nuevo{border:1px solid var(--linea);border-radius:var(--r);padding:16px;margin-top:14px;background:var(--fondo)}
