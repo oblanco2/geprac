@@ -1,7 +1,8 @@
 /**
  * Los tres roles del software: cómo se nombran en la barra, qué opciones tiene
  * el menú de cada uno —las de los nueve casos de uso, en el orden del
- * prototipo—, qué pantallas puede abrir y la pantalla con la que empieza.
+ * prototipo—, la ruta de la ayuda, qué pantallas puede abrir y la pantalla con
+ * la que empieza.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -16,9 +17,13 @@ export const MENUS = {
     ['/instituciones', 'Instituciones receptoras'], ['/historial', 'Historial del programa']],
 }
 
-/** Si el rol puede abrir la ruta: la de una opción de su menú o una pantalla que cuelga de ella, como /bandeja/12. */
+/** Las preguntas frecuentes: no van en el menú, sino en el botón de ayuda («?») de la barra, y las abren los tres roles. */
+export const AYUDA = '/preguntas-frecuentes'
+
+/** Si el rol puede abrir la ruta: la de una opción de su menú o una pantalla que cuelga de ella, como /bandeja/12, o la
+    de las preguntas frecuentes. */
 export function puedeAbrir(rol, ruta) {
-  return (MENUS[rol] || []).some(([base]) => ruta === base || ruta.startsWith(`${base}/`))
+  return ruta === AYUDA || (MENUS[rol] || []).some(([base]) => ruta === base || ruta.startsWith(`${base}/`))
 }
 
 /** La primera pantalla de cada rol. */

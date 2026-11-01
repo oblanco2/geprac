@@ -56,6 +56,17 @@ body{margin:0;background:var(--fondo);color:var(--tinta);font-size:var(--t-m);li
 .salir{background:transparent;color:var(--blanco);border:1px solid rgba(255,255,255,.7);border-radius:var(--s);padding:6px 12px;min-height:34px;font:inherit;font-size:var(--t-xs);font-weight:600;cursor:pointer}
 .salir:hover{background:rgba(255,255,255,.14)}
 .salir:focus-visible,.barra a:focus-visible{outline:2px solid var(--blanco);outline-offset:2px}
+/* el botón de ayuda, como el de Gmail: solo el ícono «?» en un círculo, con su globo «Ayuda» al pasar el mouse o llegar
+   con el teclado; el puente de 8 px deja pasar el mouse al globo sin que se cierre */
+.btn-ayuda{position:relative;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;color:var(--blanco);flex:0 0 auto}
+.btn-ayuda svg{width:24px;height:24px;display:block}
+.btn-ayuda:hover,.btn-ayuda[aria-current="page"]{background:rgba(255,255,255,.14)}
+.btn-ayuda .globo{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:60;padding:5px 10px;border-radius:6px;background:var(--tinta);color:var(--blanco);font-size:var(--t-xs);font-weight:600;line-height:1.3;white-space:nowrap;box-shadow:0 2px 8px rgba(18,38,63,.25);visibility:hidden}
+.btn-ayuda .globo::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:8px}
+.btn-ayuda:hover .globo,.btn-ayuda:focus-visible .globo{visibility:visible}
+.btn-ayuda.sin-globo .globo{visibility:hidden}
+/* en el celular, la cuenta queda junta en el primer renglón, y la ayuda y «Cerrar sesión», después */
+@media(max-width:640px){ .barra .rol .btn-ayuda{order:1} .barra .rol .salir{order:2} }
 
 .menuapp{background:var(--blanco);border-bottom:1px solid var(--linea);overflow-x:auto}
 .menuapp ul{display:flex;list-style:none;margin:0;padding:0 10px}
@@ -232,6 +243,23 @@ details.detalle summary{cursor:pointer;padding:11px 0;font-size:var(--t-s);font-
 details.detalle[open] summary{border-bottom:1px solid var(--linea);margin-bottom:12px}
 details.detalle .rotulo{margin-top:10px}
 details.detalle .lista{margin-bottom:12px}
+
+/* preguntas frecuentes: cada pregunta, un acordeón que abre y cierra su respuesta */
+.faq-intro{margin:0 0 20px;color:var(--tinta-2)}
+.faq{display:grid;gap:8px}
+details.pregunta{border:1px solid var(--linea);border-radius:var(--r);background:var(--blanco)}
+details.pregunta[open]{border-color:var(--marca);box-shadow:inset 4px 0 0 var(--acento)}
+details.pregunta summary{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:48px;padding:10px 16px;cursor:pointer;list-style:none;font-weight:600;border-radius:var(--r)}
+details.pregunta summary::-webkit-details-marker{display:none}
+details.pregunta summary::after{content:"";flex:0 0 auto;width:9px;height:9px;margin:-5px 2px 0 0;border-right:2px solid var(--marca);border-bottom:2px solid var(--marca);transform:rotate(45deg)}
+details.pregunta[open] summary::after{margin-top:5px;transform:rotate(-135deg)}
+details.pregunta summary:hover{background:var(--fondo)}
+details.pregunta[open] summary{color:var(--marca);border-radius:var(--r) var(--r) 0 0}
+.respuesta{padding:2px 16px 16px;color:var(--tinta-2)}
+.respuesta p{margin:0 0 10px}
+.respuesta p:last-child{margin-bottom:0}
+.estados-faq{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:8px}
+.estados-faq li{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 
 .docs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .doc{border:1px solid var(--linea);border-radius:var(--r);padding:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
