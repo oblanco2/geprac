@@ -426,8 +426,19 @@ details.pregunta[open] summary{color:var(--marca);border-radius:var(--r) var(--r
 .tit-app{font-size:var(--t-xl);margin:0;padding:18px 22px 0}
 .tit-app::after{content:"";display:block;width:48px;height:4px;border-radius:2px;background:var(--acento);margin-top:8px}
 .tit-app:focus{outline:none}
-.pie-app{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 18px;padding:14px 22px;border-top:1px solid var(--linea);background:var(--fondo);font-size:var(--t-xs);color:var(--tinta-3)}
+/* el pie, en tres bloques: los dos de los lados con el mismo ancho, para que los nombres queden en el centro exacto */
+.pie-app{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px 24px;padding:14px 22px;border-top:1px solid var(--linea);background:var(--fondo);font-size:var(--t-xs);color:var(--tinta-3)}
 .pie-app b{color:var(--marca);letter-spacing:.6px}
+.pie-centro{text-align:center}
+.pie-der{text-align:right}
+/* en el ingreso, entre 1000 y 1135 px de ancho el pie toma la letra de 13 px del marco, para que cada bloque quepa en
+   dos renglones */
+@media(min-width:1000px) and (max-width:1135px){ .ingreso .pie-app{font-size:var(--t-xs)} }
+/* en la tableta y el celular, uno debajo del otro y centrados */
+@media(max-width:999px){
+  .pie-app{grid-template-columns:1fr;justify-items:center;gap:10px;text-align:center}
+  .pie-der{text-align:center}
+}
 @media(max-width:900px){
   .app.cliente .lienzo{padding:14px 10px 30px}
   .tit-app{padding:14px 16px 0}
@@ -435,6 +446,6 @@ details.pregunta[open] summary{color:var(--marca);border-radius:var(--r) var(--r
 @media(max-width:640px){
   .barra{padding:12px 16px}
   .filtros.compactos .campo{flex:1 1 100%}
-  .pie-app{flex-direction:column;align-items:flex-start;padding:12px 16px}
+  .pie-app{padding:12px 16px}
   .ingreso .pie-app{padding:12px 16px}
 }
