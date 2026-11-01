@@ -6,7 +6,8 @@
  * cuenta tuviera esos datos, lo renueva para que los traiga; lo mismo hace
  * renovar(), que llama Mi perfil cuando el estudiante crea su registro o cambia
  * de programa. Una cuenta sin rol no entra: la Dirección del Programa debe
- * asignárselo.
+ * asignárselo. Al cerrar la sesión con el botón queda marcada como cerrada,
+ * para que el ingreso llegue limpio y pueda entrar otra cuenta.
  *
  * @author José Fernando Rincón Barrios
  */
@@ -19,7 +20,7 @@ import { SesionContexto } from './contexto'
 const VACIA = { sesion: null, cuenta: null, claims: {} }
 
 export default function SesionProveedor({ children }) {
-  const [estado, setEstado] = useState({ ...VACIA, lista: false, ocupado: false, aviso: null })
+  const [estado, setEstado] = useState({ ...VACIA, lista: false, ocupado: false, aviso: null, cerrada: false })
 
   const cargar = useCallback(async (sesion) => {
     if (!sesion) {
@@ -65,12 +66,18 @@ export default function SesionProveedor({ children }) {
     return () => data.subscription.unsubscribe()
   }, [cargar])
 
+  /** Cierra la sesión. Sin aviso, la cierra la persona con «Cerrar sesión»: queda cerrada y el ingreso llega limpio, sin
+      la pantalla de la que salió. Con aviso —el de otro rol—, el ingreso lo presenta y recuerda la pantalla, por si entra
+      una cuenta que tenga ese rol. */
   const salir = useCallback(async (aviso = null) => {
     await supabase.auth.signOut()
-    setEstado((e) => ({ ...e, ...VACIA, aviso }))
+    setEstado((e) => ({ ...e, ...VACIA, aviso, cerrada: !aviso }))
   }, [])
 
   const limpiarAviso = useCallback(() => setEstado((e) => (e.aviso ? { ...e, aviso: null } : e)), [])
+
+  /** El ingreso ya llegó limpio: desde ahí, una pantalla protegida vuelve a llevar al ingreso con su aviso. */
+  const olvidarCierre = useCallback(() => setEstado((e) => (e.cerrada ? { ...e, cerrada: false } : e)), [])
 
   /** Un token nuevo, con lo que el hook encuentre ahora en la cuenta: el programa y el registro de estudiante. */
   const renovar = useCallback(async () => {
@@ -78,6 +85,7 @@ export default function SesionProveedor({ children }) {
     if (!error && data.session) setEstado((e) => ({ ...e, sesion: data.session, claims: leerClaims(data.session.access_token) }))
   }, [])
 
-  const valor = useMemo(() => ({ ...estado, salir, limpiarAviso, renovar }), [estado, salir, limpiarAviso, renovar])
+  const valor = useMemo(() => ({ ...estado, salir, limpiarAviso, olvidarCierre, renovar }),
+    [estado, salir, limpiarAviso, olvidarCierre, renovar])
   return <SesionContexto.Provider value={valor}>{children}</SesionContexto.Provider>
 }

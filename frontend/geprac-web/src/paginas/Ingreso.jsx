@@ -2,7 +2,10 @@
  * P-01 · Inicio de sesión (RF-01). Autentica contra Supabase Auth con el correo
  * institucional y muestra la espera que exige RNF-03 mientras el servicio
  * responde, porque la primera petición tras un rato sin uso puede tardar hasta
- * un minuto. Con la sesión abierta, lleva a la pantalla de entrada del rol.
+ * un minuto. Con la sesión abierta, lleva a la pantalla de la que venía, si el
+ * rol de la cuenta que entró puede abrirla, o a la de entrada de su rol: así,
+ * después de cerrar la sesión puede entrar otra cuenta, del rol que sea, sin
+ * cerrar el navegador.
  *
  * La pantalla tiene su propia composición, sin la barra de la aplicación: a la
  * izquierda, la sede de la universidad con sus estudiantes y el lema
@@ -15,7 +18,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAvisar, useLimpiarAvisos, useSesion } from '../sesion/contexto'
-import { inicioDe } from '../sesion/roles'
+import { inicioDe, puedeAbrir } from '../sesion/roles'
 import Pie from '../componentes/Pie'
 import { Aviso, Boton, Campo } from '../componentes/controles'
 import arte from '../imagenes/ingreso-arte.webp'
@@ -39,7 +42,7 @@ const OJO_TACHADO = icono(<><path d="M10.6 5.6A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 
   <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18" /></>)
 
 export default function Ingreso() {
-  const { lista, ocupado, sesion, cuenta, aviso, limpiarAviso } = useSesion()
+  const { lista, ocupado, sesion, cuenta, aviso, cerrada, limpiarAviso, olvidarCierre } = useSesion()
   const avisar = useAvisar()
   const limpiarAvisos = useLimpiarAvisos()
   const location = useLocation()
@@ -58,8 +61,13 @@ export default function Ingreso() {
     document.title = 'Inicio de sesión · GEPRAC'
     tit.current?.focus()
   }, [])
+  // el ingreso ya se presentó limpio tras «Cerrar sesión»: de aquí en adelante, las pantallas protegidas traen su aviso
+  useEffect(() => { if (cerrada) olvidarCierre() }, [cerrada, olvidarCierre])
 
-  if (lista && sesion && cuenta) return <Navigate to={location.state?.desde || inicioDe(cuenta)} replace />
+  if (lista && sesion && cuenta) {
+    const desde = location.state?.desde
+    return <Navigate to={desde && puedeAbrir(cuenta.rol, desde) ? desde : inicioDe(cuenta)} replace />
+  }
 
   const ingresar = async (e) => {
     e.preventDefault()
