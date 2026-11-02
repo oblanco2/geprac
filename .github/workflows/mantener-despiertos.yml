@@ -1,10 +1,11 @@
-# Mantiene despiertos los dos microservicios de Render mientras el software se usa. Render apaga un servicio
-# gratuito después de 15 minutos sin tráfico, y la primera petición siguiente tarda cerca de un minuto en
-# despertarlo. Este flujo le pide su estado de salud a MS-01 y a MS-02 cada 5 minutos, de 6:00 a. m. a
-# 11:00 p. m., hora de Colombia; de noche se duermen, y así cada uno gasta unas 530 de las 750 horas
-# gratuitas que Render da al mes por cuenta. También se corre a mano: Actions > Mantener despiertos los
-# servicios > Run workflow. GitHub no cobra los minutos de Actions en los repositorios públicos, y corre los
-# flujos programados solo desde la rama principal del repositorio, develop.
+# Respaldo para mantener despiertos los dos microservicios de Render mientras el software se usa. Render apaga
+# un servicio gratuito después de 15 minutos sin tráfico, y la primera petición siguiente tarda cerca de un
+# minuto en despertarlo. Lo que los mantiene despiertos son dos trabajos de cron-job.org, que les piden su
+# estado de salud cada 5 minutos, de 6:00 a. m. a 10:55 p. m., hora de Colombia: GitHub no garantiza la hora
+# de los flujos programados, que retrasa o descarta cuando tiene alta carga. Este flujo hace lo mismo cuando
+# GitHub lo ejecuta y, sobre todo, se corre a mano: Actions > Mantener despiertos los servicios > Run workflow.
+# GitHub no cobra los minutos de Actions en los repositorios públicos, y corre los flujos programados solo
+# desde la rama principal del repositorio, develop.
 #
 # @author Oscar Iván Blanco Díaz
 
