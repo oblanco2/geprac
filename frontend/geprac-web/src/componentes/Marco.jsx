@@ -1,20 +1,32 @@
 /**
  * El marco de todas las pantallas, como en el prototipo: la barra con la marca
- * del software, el contexto y la cuenta, el menú del rol con las opciones que
- * nombran los casos de uso, el título de la pantalla —que recibe el foco al
- * llegar, para los lectores de pantalla—, el cuerpo y el pie con los derechos
- * de autor. Si el software llevó al usuario a esta pantalla con un aviso, lo
- * presenta arriba.
+ * del software, el contexto, el botón de ayuda y la cuenta, el menú del rol con
+ * las opciones que nombran los casos de uso, el título de la pantalla —que
+ * recibe el foco al llegar, para los lectores de pantalla—, el cuerpo y el pie
+ * con los derechos de autor. Si el software llevó al usuario a esta pantalla con
+ * un aviso, lo presenta arriba. El botón de ayuda es como el de Gmail: solo el
+ * ícono «?», que lleva a las preguntas frecuentes, con el globo «Ayuda» al pasar
+ * el mouse o llegar con el teclado.
  *
  * @author José Fernando Rincón Barrios
  */
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAvisar, useLimpiarAvisos, useSesion } from '../sesion/contexto'
-import { MENUS, PAPEL } from '../sesion/roles'
+import { AYUDA, MENUS, PAPEL } from '../sesion/roles'
 import { iniciales } from '../lib/formato'
 import { Aviso } from './controles'
 import Pie from './Pie'
+
+/** El ícono de la ayuda: un signo de interrogación dentro de un círculo. */
+const ICONO_AYUDA = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    <path d="M9.6 9.7a2.45 2.45 0 1 1 3.7 2.1c-.75.45-1.3.95-1.3 1.85v.25" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="16.7" r="1.15" fill="currentColor" />
+  </svg>
+)
 
 export default function Marco({ titulo, ctx = '', menu, children }) {
   const { cuenta, salir } = useSesion()
@@ -23,6 +35,8 @@ export default function Marco({ titulo, ctx = '', menu, children }) {
   const location = useLocation()
   const tit = useRef(null)
   const llegada = location.state?.aviso
+  // el globo «Ayuda» se cierra con Esc sin mover el mouse ni el foco, y vuelve al pasar otra vez (WCAG 1.4.13)
+  const [globo, setGlobo] = useState(true)
 
   useEffect(() => { limpiarAvisos() }, [location.pathname, limpiarAvisos])
 
@@ -30,6 +44,12 @@ export default function Marco({ titulo, ctx = '', menu, children }) {
     document.title = `${titulo} · GEPRAC`
     tit.current?.focus()
   }, [titulo])
+
+  useEffect(() => {
+    const cerrarGlobo = (e) => { if (e.key === 'Escape') setGlobo(false) }
+    document.addEventListener('keydown', cerrarGlobo)
+    return () => document.removeEventListener('keydown', cerrarGlobo)
+  }, [])
 
   const saltar = (e) => {
     e.preventDefault()
@@ -64,6 +84,12 @@ export default function Marco({ titulo, ctx = '', menu, children }) {
             {ctx && <span className="ctx">{ctx}</span>}
             {cuenta && (
               <div className="rol">
+                <Link to={AYUDA} className={globo ? 'btn-ayuda' : 'btn-ayuda sin-globo'} aria-label="Ayuda"
+                  aria-current={location.pathname === AYUDA ? 'page' : undefined}
+                  onMouseEnter={() => setGlobo(true)} onFocus={() => setGlobo(true)}>
+                  {ICONO_AYUDA}
+                  <span className="globo" aria-hidden="true">Ayuda</span>
+                </Link>
                 <span>{cuenta.nombrePresentacion} · {PAPEL[cuenta.rol]}</span>
                 <span className="avatar" aria-hidden="true">{iniciales(cuenta.nombrePresentacion)}</span>
                 <button type="button" className="salir" onClick={cerrarSesion}>Cerrar sesión</button>

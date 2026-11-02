@@ -1,7 +1,7 @@
 /**
  * El cliente web de GEPRAC: las rutas de los tres roles con las pantallas de los
- * nueve casos de uso y los proveedores que comparten todas: la sesión, los
- * avisos y la ventana de confirmación. Las direcciones van tras #, así el
+ * nueve casos de uso y sus preguntas frecuentes, y los proveedores que comparten
+ * todas: la sesión, los avisos y la ventana de confirmación. Las direcciones van tras #, así el
  * hospedaje estático sirve cualquier pantalla y los botones atrás y adelante
  * funcionan.
  *
@@ -30,6 +30,7 @@ import EditorPractica from './paginas/director/EditorPractica'
 import Instituciones from './paginas/director/Instituciones'
 import EditorInstitucion from './paginas/director/EditorInstitucion'
 import HistorialPracticas from './paginas/comun/HistorialPracticas'
+import PreguntasFrecuentes from './paginas/comun/PreguntasFrecuentes'
 
 const rutas = createHashRouter([
   { path: '/', element: <Inicio /> },
@@ -69,6 +70,12 @@ const rutas = createHashRouter([
     element: <Protegida roles={['TUTOR', 'DIRECTOR']} />,
     children: [
       { path: '/historial', element: <HistorialPracticas /> },                // P-19 · CU-09
+    ],
+  },
+  {
+    element: <Protegida roles={['ESTUDIANTE', 'TUTOR', 'DIRECTOR']} />,
+    children: [
+      { path: '/preguntas-frecuentes', element: <PreguntasFrecuentes /> },   // las de cada rol
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

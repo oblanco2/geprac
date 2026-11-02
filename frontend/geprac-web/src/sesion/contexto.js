@@ -11,7 +11,7 @@ export const SesionContexto = createContext(null)
 export const AvisosContexto = createContext({ avisar: () => {}, limpiarAnteriores: () => {} })
 export const DialogoContexto = createContext(async () => false)
 
-/** La sesión: { lista, ocupado, sesion, cuenta, claims, aviso, salir, limpiarAviso, renovar }. */
+/** La sesión: { lista, ocupado, sesion, cuenta, claims, aviso, cerrada, salir, limpiarAviso, olvidarCierre, renovar }. */
 export const useSesion = () => useContext(SesionContexto)
 /** avisar(texto, clase): el aviso flotante que confirma el resultado de una acción. */
 export const useAvisar = () => useContext(AvisosContexto).avisar
