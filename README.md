@@ -35,7 +35,7 @@ Dos microservicios con base de datos independiente, consumidos por un cliente we
 
 ```
 .github/
-  workflows/             el flujo que mantiene despiertos los servicios
+  workflows/             el flujo de respaldo que despierta los servicios
 backend/
   geprac-academico/      MS-01 Identidad y Perfil Académico
   geprac-legalizacion/   MS-02 Legalización de Prácticas
@@ -144,7 +144,7 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 - **Ramas:** `develop` integra los cambios de los tres y es la que despliegan Render y Vercel; `main` guarda la versión entregada, con su etiqueta: `v1.0.0` para la entrega final, `v1.1.0` con las correcciones de los profesores en el tercer corte, `v1.2.0` con la ayuda, el cierre de sesión, el ícono, el pie con los autores y el flujo que mantiene despiertos los servicios, y `v1.2.1` con la versión del software en el pie.
 - **Token de acceso:** la migración V4 de MS-01 crea la función `identidad.claims_del_token`, que añade al token el rol, el programa y el identificador del estudiante; con eso cada microservicio autoriza sin consultar al otro. Se activa una sola vez en Supabase, en el proyecto de MS-01: *Authentication → Hooks → Customize Access Token (JWT) Claims*, tipo Postgres, esquema `identidad`, función `claims_del_token`.
 - El plan gratuito de Render suspende el servicio tras un rato sin uso. La primera petición puede tardar unos 50 segundos mientras despierta, y el cliente la espera hasta 60.
-- **Servicios despiertos:** el flujo de GitHub Actions `.github/workflows/mantener-despiertos.yml` le pide su estado de salud (`/api/actuator/health`) a MS-01 y a MS-02 cada 5 minutos, de 6:00 a. m. a 11:00 p. m., hora de Colombia, para que Render no los suspenda mientras el software se usa; de noche se suspenden y ahorran horas del plan gratuito. Corre desde `develop`, la rama principal del repositorio, y también se ejecuta a mano: *Actions → Mantener despiertos los servicios → Run workflow*.
+- **Servicios despiertos:** dos trabajos de [cron-job.org](https://cron-job.org), un servicio gratuito de tareas programadas, le piden su estado de salud (`/api/actuator/health`) a MS-01 y a MS-02 cada 5 minutos, de 6:00 a. m. a 10:55 p. m., hora de Colombia —expresión `*/5 6-22 * * *`, zona `America/Bogota`—, para que Render no los suspenda mientras el software se usa; de noche se suspenden y ahorran horas del plan gratuito. El flujo de GitHub Actions `.github/workflows/mantener-despiertos.yml` hace lo mismo como respaldo, porque GitHub no garantiza la hora de sus ejecuciones programadas, y se ejecuta a mano: *Actions → Mantener despiertos los servicios → Run workflow*.
 
 | Componente | Dirección |
 |---|---|
