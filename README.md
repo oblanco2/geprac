@@ -2,7 +2,7 @@
 
 **Software para la Gestión de Prácticas Académicas**
 
-Universidad de Investigación y Desarrollo · Ingeniería de Sistemas · Proyecto Integrador de quinto semestre · Periodo II-2026 · Versión 1.2.0
+Universidad de Investigación y Desarrollo · Ingeniería de Sistemas · Proyecto Integrador de quinto semestre · Periodo II-2026 · Versión 1.2.1
 
 En los programas de licenciatura de la UDI, cada estudiante realiza una práctica pedagógica por semestre, de primero a octavo, y para cada una diligencia los mismos cuatro formatos institucionales. GEPRAC elimina esa repetición: el estudiante se registra una sola vez, selecciona la práctica que va a cursar y el software genera sus formatos ya diligenciados, con los datos de su registro y el contenido de esa práctica tomado del catálogo. El historial de las ocho prácticas queda disponible en cualquier momento.
 
@@ -141,7 +141,7 @@ Ninguna credencial vive en este repositorio: todas viajan como variables de ento
 - **MS-01:** Render construye la imagen con el `Dockerfile` de dos etapas de `backend/geprac-academico` —Maven compila el proyecto y una imagen mínima de Java 21 ejecuta el binario con un usuario sin privilegios— y la despliega con cada commit en la rama `develop`.
 - **MS-02:** igual que MS-01, con el `Dockerfile` de `backend/geprac-legalizacion`. Un filtro de construcción hace que solo se vuelva a desplegar cuando un commit en `develop` cambia esa carpeta.
 - **Cliente web:** Vercel, también desde la rama `develop`.
-- **Ramas:** `develop` integra los cambios de los tres y es la que despliegan Render y Vercel; `main` guarda la versión entregada, con su etiqueta: `v1.0.0` para la entrega final, `v1.1.0` con las correcciones de los profesores en el tercer corte y `v1.2.0` con la ayuda, el cierre de sesión, el ícono, el pie con los autores y el flujo que mantiene despiertos los servicios.
+- **Ramas:** `develop` integra los cambios de los tres y es la que despliegan Render y Vercel; `main` guarda la versión entregada, con su etiqueta: `v1.0.0` para la entrega final, `v1.1.0` con las correcciones de los profesores en el tercer corte, `v1.2.0` con la ayuda, el cierre de sesión, el ícono, el pie con los autores y el flujo que mantiene despiertos los servicios, y `v1.2.1` con la versión del software en el pie.
 - **Token de acceso:** la migración V4 de MS-01 crea la función `identidad.claims_del_token`, que añade al token el rol, el programa y el identificador del estudiante; con eso cada microservicio autoriza sin consultar al otro. Se activa una sola vez en Supabase, en el proyecto de MS-01: *Authentication → Hooks → Customize Access Token (JWT) Claims*, tipo Postgres, esquema `identidad`, función `claims_del_token`.
 - El plan gratuito de Render suspende el servicio tras un rato sin uso. La primera petición puede tardar unos 50 segundos mientras despierta, y el cliente la espera hasta 60.
 - **Servicios despiertos:** el flujo de GitHub Actions `.github/workflows/mantener-despiertos.yml` le pide su estado de salud (`/api/actuator/health`) a MS-01 y a MS-02 cada 5 minutos, de 6:00 a. m. a 11:00 p. m., hora de Colombia, para que Render no los suspenda mientras el software se usa; de noche se suspenden y ahorran horas del plan gratuito. Corre desde `develop`, la rama principal del repositorio, y también se ejecuta a mano: *Actions → Mantener despiertos los servicios → Run workflow*.
@@ -171,7 +171,7 @@ El recorrido: Oscar registra una institución (CU-03), añade una actividad a la
 
 ## Estado del desarrollo
 
-La versión 1.2.0, de la entrega final, opera de punta a punta los nueve casos de uso:
+La versión 1.2.1, de la entrega final, opera de punta a punta los nueve casos de uso:
 
 | Caso de uso | Pantallas | Rutas |
 |---|---|---|
@@ -187,7 +187,7 @@ La versión 1.2.0, de la entrega final, opera de punta a punta los nueve casos d
 
 - **MS-01:** además, `GET /usuarios/me`, la cuenta de quien ingresa, que se registra en su primer ingreso; `GET /programas`, y `GET /usuarios/{id}/rol`, que consulta MS-02. Cinco migraciones; la V4 añade al token el rol, el programa y el estudiante.
 - **MS-02:** cada ruta se abre solo al rol que le corresponde según el token. Al iniciar la inscripción le pide a MS-01 el expediente del estudiante, y al designar un tutor, su rol, con el token de quien hace la petición. Tres migraciones; la V2 pone en vigencia las plantillas de los cuatro formatos, que se emiten en PDF.
-- **Cliente web:** las diecinueve pantallas del prototipo de alta fidelidad, con el ingreso (P-01) y el menú de cada rol. Desde la versión 1.1.0, con el inicio de sesión rediseñado —la sede de la UDI y el logo de GEPRAC—, la letra más grande —16 px en los campos de los formularios y 18 px en el ingreso—, el amarillo institucional como tercer color, de contraste, y las tablas de las bandejas, los historiales y las instituciones con cinco filas por página y el filtro por estado al pie. Desde la versión 1.2.0, con el botón de ayuda («?») en la barra, que abre las preguntas frecuentes de cada rol; el cierre de sesión que deja entrar con otra cuenta, del rol que sea, en la misma pestaña; el ícono de GEPRAC en la pestaña del navegador, y el pie con los nombres de los autores en el centro.
+- **Cliente web:** las diecinueve pantallas del prototipo de alta fidelidad, con el ingreso (P-01) y el menú de cada rol. Desde la versión 1.1.0, con el inicio de sesión rediseñado —la sede de la UDI y el logo de GEPRAC—, la letra más grande —16 px en los campos de los formularios y 18 px en el ingreso—, el amarillo institucional como tercer color, de contraste, y las tablas de las bandejas, los historiales y las instituciones con cinco filas por página y el filtro por estado al pie. Desde la versión 1.2.0, con el botón de ayuda («?») en la barra, que abre las preguntas frecuentes de cada rol; el cierre de sesión que deja entrar con otra cuenta, del rol que sea, en la misma pestaña; el ícono de GEPRAC en la pestaña del navegador, y el pie con los nombres de los autores en el centro. Desde la versión 1.2.1, con la versión del software a la izquierda del pie, que Vite toma del `package.json` al compilar.
 - **Pruebas:** `mvnw test` en cada microservicio, sin base de datos —59 pruebas en MS-01 y 143 en MS-02—, y `npm run lint` y `npm run build` en el cliente.
 
 ## Entregas
@@ -196,4 +196,4 @@ La versión 1.2.0, de la entrega final, opera de punta a punta los nueve casos d
 |---|---|
 | Primer avance · Propuesta | 30 de agosto de 2026 |
 | Segundo avance · Prototipo funcional | 11 de octubre de 2026 |
-| Entrega final · Aplicación · versión 1.2.0 | 15 de noviembre de 2026 |
+| Entrega final · Aplicación · versión 1.2.1 | 15 de noviembre de 2026 |

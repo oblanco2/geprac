@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.udi.geprac</groupId>
 	<artifactId>geprac-legalizacion</artifactId>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 	<name>geprac-legalizacion</name>
 	<description>GEPRAC · MS-02 Legalización de Prácticas</description>
 	<url/>
