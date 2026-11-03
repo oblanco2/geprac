@@ -43,7 +43,6 @@ frontend/
   geprac-web/            cliente web
 infra/
   db/                    scripts de la base de datos
-docs/                    documentos de las entregas
 ```
 
 ## Actores y casos de uso
